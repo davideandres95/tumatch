@@ -1,7 +1,7 @@
 import enum
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy.schema import UniqueConstraint, Index
 from sqlalchemy.sql import func
 
 db = SQLAlchemy()
@@ -44,6 +44,9 @@ class Order(db.Model):
 
     def __repr__(self):
         return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
+
+Index('uuid', Order.user_id, Order.side, Order.security_id, Order.quantity)
+
 
 class Match(db.Model):
     __tablename__ = 'match'

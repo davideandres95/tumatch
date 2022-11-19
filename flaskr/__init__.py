@@ -62,7 +62,7 @@ def create_app(test_config=None):
     @app.route('/User')
     def print_user():
         david = User.query.first()
-        return 'Hello, {} your id is {}'.format(david.name, david.id)
+        return 'Hello, {} your cool id is {}'.format(david.name, david.id)
 
     @app.route('/Securities')
     def print_securities():
