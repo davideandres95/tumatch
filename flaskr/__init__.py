@@ -8,8 +8,9 @@ from flask_sock import Sock
 from .utils import process_websocket, process_http, process_auth
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
+from threading import Thread
 
-from .api import register, login
+from .api import register, login, extract_user
 
 def create_app(test_config=None):
     # create and configure the app
@@ -87,11 +88,19 @@ def create_app(test_config=None):
         security = Security.query.first()
         print(security)
         return '{}'.format(security.name)
+    
+    def websocket_client(arg):
+        for i in range(arg):
+            print("running")
+            sleep(1)
 
-    @socket.route('/websocket')
-    def websocket(sock):
-        data = sock.receive()
-        valid = process_websocket(data)
-        print(valid)
+
+    @socket.route('/websocket/<token>')
+    def websocket(sock, token):
+        user = extract_user(token)
+        while True:
+            data = sock.receive()
+            valid, data = process_websocket("%s user=%s" % (data, user))
+            sock.send(data)
 
     return app

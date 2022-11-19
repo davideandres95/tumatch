@@ -16,15 +16,15 @@ def process_input_internal(request: dict):
                 return (False, "Invalid format")
             if request['side'].lower() not in ['buy', 'sell', 'del']:
                 return (False, "Invalid format: Side must be [buy, sell, del]")
-            if request['quantity'].isdigit() is False or int(request['quantity']) <= 0:
+            if (isinstance(request['quantity'],  int) is False) and (request['quantity'].isdigit() is False or int(request['quantity']) <= 0):
                 return (False, "Invalid format: Quantity must be a positive integer")
-            if request['price'].isdigit() is False or int(request['price']) <= 0:
+            if (isinstance(request['price'],  int) is False) and (request['price'].isdigit() is False or int(request['price']) <= 0):
                 return (False, "Invalid format: Price must be a positive integer")
-            if len(request['user']) <= 3:
+            if len(request['user']) < 3:
                 return (False, "Invalid format: User invalid (too short or missing)")
             if len(request['security']) <= 2:
                 return (False, "Invalid format: Security invalid (too short or missing)")
-        return (True, "")
+        return (True, request)
     except:
         return (False, "Invalid format: {request, qty={}, price={}, sec={}, side={}, user={}")
     return (True, args)

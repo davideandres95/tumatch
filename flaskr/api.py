@@ -19,7 +19,8 @@ def register(username, password):
     db.session.commit()
 
     token = jwt.encode({
-        'public_id': user.id
+        'public_id': user.id,
+        'user_name': user.name
     }, "KEY_PRIVATE").encode('ascii')
 
     return {'token': token}
@@ -37,7 +38,15 @@ def login(username, password):
         abort(400, {'msg': 'Incorrect credentials'})
 
     token = jwt.encode({
-        'public_id': user.id
+        'public_id': user.id,
+        'user_name': user.name
     }, "KEY_PRIVATE")
     token = base64.b64encode(token).decode("utf-8")
     return {'token': token}
+
+def extract_user(token: str):
+    try:
+        token = base64.b64decode(token.encode("utf-8"))
+        return jwt.decode(token, key='KEY_PRIVATE')['user_name']
+    except:
+        return None
