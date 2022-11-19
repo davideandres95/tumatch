@@ -1,0 +1,6 @@
+{
+    "AddOrderResponse": {
+        "status": "SUCCESS",
+        "message": "Add 1000 IBM at price 123 to SELL Request by Mike is accepted!"
+    }
+}
