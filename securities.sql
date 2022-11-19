@@ -1,4 +1,4 @@
-INSERT INTO 'security' ('name') VALUES ('Symbol');
+BEGIN TRANSACTION;
 INSERT INTO 'security' ('name') VALUES ('A');
 INSERT INTO 'security' ('name') VALUES ('AA');
 INSERT INTO 'security' ('name') VALUES ('AAC');
@@ -8284,3 +8284,4 @@ INSERT INTO 'security' ('name') VALUES ('ZWS');
 INSERT INTO 'security' ('name') VALUES ('ZYME');
 INSERT INTO 'security' ('name') VALUES ('ZYNE');
 INSERT INTO 'security' ('name') VALUES ('ZYXI');
+COMMIT;

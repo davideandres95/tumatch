@@ -22,7 +22,6 @@ class User(db.Model):
 class Security(db.Model):
     __tablename__ = 'security'
     id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):

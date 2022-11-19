@@ -68,12 +68,22 @@
 
 # Commands for running
 
-# run flask app
+## set up env
+```
+python -m venv .
+pip install -r requirements.txt
+source bin/activate
+```
+
+## run flask app
 ```
 flask --app flaskr --debug run
 ```
 
-# initialize db
+# populate db with securities
 ```
-flask --app flaskr init-db
+python3 symbols_parser.py
+cd var/flaskr-instance
+sqlite3 project.db
+.read ../../securities.sql
 ```
