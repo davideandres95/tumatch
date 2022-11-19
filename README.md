@@ -3,21 +3,21 @@
 
 # Requirements
 
-- [] Add Order
-- [] Delete Order
-- [] List owned orders
-- [] list match history
+- [ ] Add Order
+- [ ] Delete Order
+- [ ] List owned orders
+- [ ] list match history
 
-# List of tables
+## List of tables
 
 - Users: UUID, NAME
 - Orders: UUID, USER, SIDE, SEQ, QTY
-- Matches: UUID, SELL_ORDER, SELLER_NAME, BUY_ORDER, BUYER_NAME, SECURITY, QTY
+- Matches: UUID, SELL_ORDER_ID, BUY_ORDER_ID, SECURITY, QTY
 - Sequrities UUID, NAME
 - LOG: UUID, USER_ID, SIED, SEQ, QTY
 
 
-# Add order
+## Add order
 
 - Input data:
 	- request (add)
@@ -29,11 +29,11 @@
 	- status (OK, REJECTED)
 	- message (optional)
 
-## Comments/Discussion
+### Comments/Discussion
 - If a user sends an update request, the entry with matching hash will be updated.
 - All requests are logged into the order log table
 
-# Delete order
+## Delete order
 
 - Input data:
 	- request (del)
@@ -46,7 +46,7 @@
 	- message (optional)
 
 
-# List owned orders
+## List owned orders
 
 - Input data:
 	- request (list_orders)
@@ -56,7 +56,7 @@
 	- List of owned orders
 
 
-# List matched orders
+## List matched orders
 
 - Input data:
 	- request (list_matches)
@@ -65,3 +65,15 @@
 - Response data:
 	- List of matched orders
 
+
+# Commands for running
+
+# run flask app
+```
+flask --app flaskr --debug run
+```
+
+# initialize db
+```
+flask --app flaskr init-db
+```

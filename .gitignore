@@ -2,12 +2,15 @@ venv/
 lib/
 bin/
 lib64
+var/
 
 *.pyc
+*.swp
 __pycache__/
 pyvenv.cfg
 
 instance/
+include/
 
 .pytest_cache/
 .coverage
