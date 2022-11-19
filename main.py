@@ -69,12 +69,14 @@ def update_db(requests):
                 )
             )
             requests = requests.drop(labels=idx, axis=0)
-    print(orderbook_history)
-    return requests
+
+    return orderbook_history, requests
 
 
-def match(orderbook_history):
-    # for sec in orderbook_history[]
+def match(orderbook_history, requests):
+    for buy_request in orderbook_history['Buy']:
+        print(requests['price'][orderbook_history['Buy'][buy_request][0]]) # TODO could be saved directly to orderbook_history
+        price = requests['price'][orderbook_history['Buy'][buy_request][0]]
     return orderbook_history
 
 
@@ -91,12 +93,12 @@ def requests_loading():
     print("Requested Orders:")
     print(requests)
 
+    orderbook_history, requests = update_db(requests)
     print("Filtered Orders:")
-    requests = update_db(requests)
     print(requests)
 
-    # print("Matched Orders:")
-    # orderbook_history = match(orderbook_history)
-    # print(orderbook_history)
+    requests = match(orderbook_history, requests)
+    print("Matched Orders:")
+    print(requests)
 
     return "</p>Requests are loaded..</p>"
