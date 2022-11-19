@@ -7,13 +7,16 @@ import hashlib
 
 app = Flask(__name__, template_folder="templates")
 
-orderbook_history = {"Sell" : {}, "Buy" : {}}
+orderbook_history = {"Sell": {}, "Buy": {}}
 
 # TODO generally move to object oriented
 
 # add-add is cumlative buy/sell
+
+
 def update_order_quantity(old, new):
     return old + new
+
 
 def update_db(requests):
     for idx in requests.index:
@@ -53,14 +56,16 @@ def update_db(requests):
                 + ": [DUPLICATED] similar order found: %s" % order_str
             )
             # new order override prev price
-            orderbook_history[request_type][hex_dig][1].append(requests["quantity"][idx])
-
-            requests.loc[orderbook_history[request_type][hex_dig][0], 'quantity'] = update_order_quantity(
+            orderbook_history[request_type][hex_dig][1].append(
+                requests["quantity"][idx])
+            new_quantity = update_order_quantity(
                 orderbook_history[request_type][hex_dig][1][0], requests["quantity"][idx]
             )
+            requests.loc[orderbook_history[request_type]
+                         [hex_dig][0], 'quantity'] = new_quantity
             print(
                 "The previous order's quantity is updated to= {}".format(
-                    orderbook_history[request_type][hex_dig][1][0]
+                    new_quantity
                 )
             )
             requests = requests.drop(labels=idx, axis=0)
