@@ -40,12 +40,14 @@ class Order(db.Model):
     user = db.relationship("User", backref="order", lazy=False)
     security_id = db.Column(db.Integer, db.ForeignKey('security.id'))
     security = db.relationship("Security", backref="order", lazy=False)
+    price = db.Column(db.Integer, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    u_idx = db.Column(db.String(100), nullable=False, index=True, unique=True)
 
     def __repr__(self):
         return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
 
-Index('uuid', Order.user_id, Order.side, Order.security_id, Order.quantity)
+# Index('uuid', Order.user_id, Order.side, Order.security_id, Order.quantity, Order.price)
 
 
 class Match(db.Model):

@@ -1,4 +1,4 @@
-import os, enum
+import os, enum, hashlib
 
 from werkzeug.security import generate_password_hash
 from flaskr.models import db, User, Security, Order, Match, Record, Side
@@ -40,7 +40,10 @@ def create_app(test_config=None):
         db.create_all()
         david = User.query.filter_by(name='David').first()
         jnpr = Security.query.filter_by(name='JNPR').first()
-        sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100) 
+        hash_seed = str(david.id) + str(jnpr.id) + Side.buy.name + "5" + "100"
+        hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
+        hex_dig = hash_object.hexdigest()
+        sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100, price=5, u_idx=hex_dig) 
         if Order.query.get(1) == None:
             db.session.add(sell_order_1)
             db.session.commit()
@@ -51,6 +54,38 @@ def create_app(test_config=None):
             db.session.add(user_david, sell_order_1)
 
             db.session.commit()
+
+    def process_delete_order(payload_order):
+        return True
+
+    def process_update_order(payload_order):
+        return True
+
+    def process_order(payload_order):
+        if payload_order["request"] == "Del":
+            process_delete_order(payload_order)
+        elif payload_order["request"] == "Add":
+            user_text = payload_order["user"]
+            security_text = payload_order["security"]
+            side_text = payload_order["side"]
+            price_text = payload_order["price"]
+            quantity_text = payload_order["quantity"]
+
+
+            security_id = Security.query.filter_by(name=security_text).first().id
+            user_id = User.query.filter_by(name=user_text).first().id
+            print(Side[side_text.lower()].name)
+            hash_seed = str(user_id) + str(security_id) + Side[side_text.lower()].name + str(price_text) + str(quantity_text)
+            hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
+            hex_dig = hash_object.hexdigest()
+
+            if (Order.query.filter_by(u_idx=hex_dig).first() == None):
+                candidate_order = Order(side=Side[side_text.lower()], user_id=user_id, security_id=security_id, quantity=int(quantity_text), price=int(price_text), u_idx=hex_dig) 
+                db.session.add(candidate_order)
+            else:
+                process_update_order(payload_order)
+                print('Order already exists, it should be updated')
+
 
     # a simple page that says hello
     @app.route('/http', methods=['POST', 'GET'])
@@ -69,6 +104,15 @@ def create_app(test_config=None):
         security = Security.query.first()
         print(security)
         return '{}'.format(security.name)
+
+    @app.route('/order', methods=['POST'])
+    def post_order():
+        payload = request.get_json()["AddOrderRequest"]
+        for payload_order in payload:
+            result = process_order(payload_order)
+        result = db.session.commit()
+        print(result)
+        return 'Payload read succesfully (maybe)...{}'
 
     @socket.route('/websocket')
     def websocket(sock):
