@@ -54,6 +54,23 @@ def update_db(requests):
                 + hex_dig
                 + ": [  UNIQUE  ] new order registration: %s" % order_str
             )
+
+            # Before validation check if the request is delete for non-existent add
+            if requests["request"][calculated_index] == "Del":
+                del_origin_hash_seed = "[{}]{}+{}+{}:{}".format(
+                    requests["user"][idx],
+                    "Add", # FIXME workaround TODO
+                    requests["security"][idx],
+                    requests["side"][idx],
+                    requests["price"][idx]
+                )
+                del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
+                if orderbook_history[request_type].get(del_origin_hex_dig) is None:
+                    print("Delete order is requested for non-existing order. Delete Order is ignored") # TODO improve reporting
+                    requests = requests.drop(labels=idx, axis=0)
+                    continue
+                del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], new_quantity))
+
             orderbook_history[request_type][hex_dig] = [
                 idx, [requests["quantity"][idx]]
             ]
@@ -83,18 +100,7 @@ def update_db(requests):
             calculated_index =  orderbook_history[request_type].get(hex_dig)[0]
             # print("XXXX calculated_index= " + str(calculated_index))
 
-        if requests["request"][calculated_index] == "Del":
-            del_origin_hash_seed = "[{}]{}+{}+{}:{}".format(
-                requests["user"][idx],
-                "Add", # FIXME workaround TODO
-                requests["security"][idx],
-                requests["side"][idx],
-                requests["price"][idx]
-            )
-            del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
-            del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], new_quantity))
-
-    # print(del_requests)
+    print(del_requests)
     # # Remove from Data base the Delete requests if they exist
     # # TODO store locations of delete to improve perf
     for delete_request_info  in del_requests:
