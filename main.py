@@ -62,7 +62,7 @@ def update_db(requests):
                     orderbook_history[hex_dig][1][0]
                 )
             )
-            # requests.drop(0, axis=0)
+            requests = requests.drop(labels=idx, axis=0)
     return requests
 
 
