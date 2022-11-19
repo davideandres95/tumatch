@@ -1,36 +1,40 @@
 {
     "AddOrderRequest": [
         {
+            "timestamp": 0,
+            "user": "Parag",
             "request": "Add",
             "security": "Twitter",
-            "quantity": "1000",
-            "price": "2",
-            "side": "SELL",
-            "User": "Parag"
+            "quantity": 1000,
+            "price": 2,
+            "side": "Sell"
         },
         {
+            "timestamp": 1,
+            "user": "Parag",
             "request": "Add",
             "security": "Twitter",
-            "quantity": "2000",
-            "price": "2",
-            "side": "SELL",
-            "User": "Parag"
+            "quantity": 2000,
+            "price": 2,
+            "side": "Sell"
         },
         {
+            "timestamp": 2,
+            "user": "Dorsey",
             "request": "Add",
             "security": "Twitter",
-            "quantity": "1000",
+            "quantity": 1000,
             "price": "5",
-            "side": "SELL",
-            "User": "Dorsey"
+            "side": "Sell"
         },
         {
+            "timestamp": 3,
+            "user": "Musk",
             "request": "Add",
             "security": "Twitter",
-            "quantity": "1000",
+            "quantity": 1000,
             "price": "3",
-            "side": "BUY",
-            "User": "Musk"
+            "side": "Buy"
         }
     ]
 }
