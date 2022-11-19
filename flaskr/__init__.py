@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask
+from flask import Flask, request
+from .utils import process_socket, process_http
 
 
 def create_app(test_config=None):
@@ -25,8 +26,10 @@ def create_app(test_config=None):
         pass
 
     # a simple page that says hello
-    @app.route('/hello')
+    @app.route('/hello', methods=['POST'])
     def hello():
+        valid = process_http(request)
+        print(valid)
         return 'Hello, World!'
 
     return app
