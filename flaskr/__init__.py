@@ -42,8 +42,8 @@ def create_app(test_config=None):
         db.session.commit()
 
     # a simple page that says hello
-    @app.route('/hello', methods=['POST'])
-    def hello():
+    @app.route('/http', methods=['POST', 'GET'])
+    def http():
         valid = process_http(request)
         print(valid)
         return 'Hello, World!'
