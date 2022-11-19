@@ -1,7 +1,8 @@
 import os
 
 from flask import Flask, request
-from .utils import process_socket, process_http
+from flask_sock import Sock
+from .utils import process_websocket, process_http
 
 
 def create_app(test_config=None):
@@ -11,6 +12,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
+    socket = Sock(app)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -31,6 +33,10 @@ def create_app(test_config=None):
         valid = process_http(request)
         print(valid)
         return 'Hello, World!'
-    
 
+    @socket.route('/websocket')
+    def websocket(sock):
+        data = sock.receive()
+        valid = process_websocket(data)
+        print(valid)
     return app

@@ -1,1 +1,1 @@
-from .inputproc import process_socket, process_http
+from .inputproc import process_websocket, process_http
