@@ -7,13 +7,16 @@ import hashlib
 
 app = Flask(__name__, template_folder="templates")
 
+# TODO generally move to object oriented
 orderbook_history = {"Sell": {}, "Buy": {}}
 
-# TODO generally move to object oriented
+
+def read_requests():
+    with open("./data/client_requests.json", "r") as myfile:
+        data = myfile.read()
+    return data
 
 # add-add is cumlative buy/sell
-
-
 def update_order_quantity(old, new):
     return old + new
 
@@ -72,19 +75,11 @@ def update_db(requests):
 
     return orderbook_history, requests
 
-
 def match(orderbook_history, requests):
     for buy_request in orderbook_history['Buy']:
         print(requests['price'][orderbook_history['Buy'][buy_request][0]]) # TODO could be saved directly to orderbook_history
         price = requests['price'][orderbook_history['Buy'][buy_request][0]]
     return orderbook_history
-
-
-def read_requests():
-    with open("./data/client_requests.json", "r") as myfile:
-        data = myfile.read()
-    return data
-
 
 @app.route("/")
 def requests_loading():
