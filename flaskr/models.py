@@ -22,6 +22,7 @@ class User(db.Model):
 class Security(db.Model):
     __tablename__ = 'security'
     id = db.Column(db.Integer, primary_key=True)
+    symbol = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
@@ -48,22 +49,20 @@ class Match(db.Model):
     created_at = db.Column(db.DateTime(timezone=True),
             server_default=func.now())
     sell_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-    sell_order = db.relationship("Order", backref="match", lazy=True)
     buy_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-    buy_order = db.relationship("Order", backref="match", lazy=True)
     quantity = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Match: {self.sell_order.user.name} {self.buy_order.user.name} {self.sell_order.security.name} {self.quantity}>'
 
-    class Record(db.Model):
-        __tablename__ = 'record'
-        id = db.Column(db.Integer, primary_key=True)
-        created_at = db.Column(db.DateTime(timezone=True),
-                server_default=func.now())
-        user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-        user = db.relationship("User", backref="record", lazy=False)
-        payload = db.Column(db.Text, nullable=True)
+class Record(db.Model):
+    __tablename__ = 'record'
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime(timezone=True),
+            server_default=func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User", backref="record", lazy=False)
+    payload = db.Column(db.Text, nullable=True)
 
-        def __repr__(self):
-            return f'<Order: {self.user.name} {self.payload}>'
+    def __repr__(self):
+        return f'<Order: {self.user.name} {self.payload}>'

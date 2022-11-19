@@ -1,5 +1,6 @@
 import os, enum
 
+from flaskr.models import db, User, Security, Order, Match, Record
 from flaskr.models import db
 from flask import Flask, request
 from flask_sock import Sock
@@ -34,6 +35,11 @@ def create_app(test_config=None):
     # initialize the app with the extension
     db.init_app(app)
 
+    with app.app_context():
+        db.create_all()
+        user_david = User(name='David')
+        db.session.add(user_david)
+        db.session.commit()
 
     # a simple page that says hello
     @app.route('/http', methods=['POST', 'GET'])
@@ -42,9 +48,15 @@ def create_app(test_config=None):
         print(valid)
         return 'Hello, World!'
 
+    @app.route('/User')
+    def print_user():
+        david = User.query.first()
+        return 'Hello, {} your id is {}'.format(david.name, david.id)
+
     @socket.route('/websocket')
     def websocket(sock):
         data = sock.receive()
         valid = process_websocket(data)
         print(valid)
+
     return app
