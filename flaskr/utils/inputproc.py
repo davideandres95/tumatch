@@ -3,9 +3,28 @@ from flask import request
 
 def process_input_internal(request: dict):
     try:
-        if request['func'] not in ['add', 'sell', 'del', 'list']:
+        request_type = request['request'].lower()
+        if request_type not in ['add', 'del', 'list']:
             return (False, 'Invalid function')
-        return (True, request.keys())
+        if request_type == 'list':
+            return (True, ['list']) if len(request.keys()) == 1 else (False, "Invalid Format")
+        elif request_type == 'add':
+            keys = list(request.keys()).copy()
+            keys.sort()
+
+            if keys != ['price', 'quantity', 'request', 'security', 'side', 'user']:
+                return (False, "Invalid format")
+            if request['side'].lower() not in ['buy', 'sell', 'del']:
+                return (False, "Invalid format: Side must be [buy, sell, del]")
+            if request['quantity'].isdigit() is False or int(request['quantity']) <= 0:
+                return (False, "Invalid format: Quantity must be a positive integer")
+            if request['price'].isdigit() is False or int(request['price']) <= 0:
+                return (False, "Invalid format: Price must be a positive integer")
+            if len(request['user']) <= 3:
+                return (False, "Invalid format: User invalid (too short or missing)")
+            if len(request['security']) <= 2:
+                return (False, "Invalid format: Security invalid (too short or missing)")
+        return (True, "")
     except:
         return (False, "Invalid format of JSON")
     return (True, args)
@@ -16,13 +35,16 @@ def process_socket(request: object):
         return (False, "Malformed input")
     return process_input_internal(request.get_json())
 
+def normalize_dict(request: dict):
+    return {k.lower(): request[k] for k in request.keys()}
+
 def process_http(request: object):
     content_type = request.headers.get('Content-Type')
     print(request.headers, request.form)
     if (content_type.startswith('application/json')):
-        return process_input_internal(request.get_data())
+        return process_input_internal(normalize_dict(request.get_data()))
     elif (content_type.startswith('multipart/form-data')):
-        return process_input_internal(request.form.to_dict(flat=False))
+        return process_input_internal(normalize_dict(request.form.to_dict(flat=True)))
     else:
         return (False, 'Content-Type not supported')
 
