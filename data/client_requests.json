@@ -51,7 +51,7 @@
             "request": "Add",
             "security": "Twitter",
             "quantity": 500,
-            "price": 5,
+            "price": 3,
             "side": "Buy"
         }
     ]

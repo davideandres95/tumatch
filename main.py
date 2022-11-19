@@ -24,7 +24,7 @@ def update_db(requests):
             requests["side"][idx],
             requests["price"][idx]
         )
-        hash_seed = "{}{}{}{}{}".format(
+        hash_seed = "[{}]{}+{}+{}:{}".format(
             requests["user"][idx],
             requests["request"][idx],
             requests["security"][idx],
@@ -35,14 +35,15 @@ def update_db(requests):
         hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
         hex_dig = hash_object.hexdigest()
 
-        if orderbook_history.get(hex_dig) is None:
+        inserted_order = orderbook_history.get(hex_dig)
+        if inserted_order is None:
             print(
                 "Received Order Hash: "
                 + hex_dig
                 + ": [  UNIQUE  ] new order registration: %s" % order_str
             )
             orderbook_history[hex_dig] = [
-                requests["quantity"][idx]
+                idx, [requests["quantity"][idx]]
             ]
         else:
             print(
@@ -51,15 +52,14 @@ def update_db(requests):
                 + ": [DUPLICATED] similar order found: %s" % order_str
             )
             # new order override prev price
-            orderbook_history[hex_dig].append(requests["quantity"][idx])
-            testt = update_order_quantity(
-                orderbook_history[hex_dig][0], requests["quantity"][idx]
+            orderbook_history[hex_dig][1].append(requests["quantity"][idx])
+
+            requests.loc[orderbook_history[hex_dig][0], 'quantity'] = update_order_quantity(
+                orderbook_history[hex_dig][1][0], requests["quantity"][idx]
             )
-            requests.loc[idx, 'quantity'] = testt
-            print(testt)
             print(
                 "The previous order's quantity is updated to= {}".format(
-                    orderbook_history[hex_dig]
+                    orderbook_history[hex_dig][1][0]
                 )
             )
             # requests.drop(0, axis=0)
