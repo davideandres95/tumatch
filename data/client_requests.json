@@ -44,6 +44,15 @@
             "quantity": 4000,
             "price": 6,
             "side": "Buy"
+        },
+        {
+            "timestamp": 66,
+            "user": "Parag",
+            "request": "Del",
+            "security": "AAPL",
+            "quantity": 100,
+            "price": 2,
+            "side": "Sell"
         }
     ]
 }
