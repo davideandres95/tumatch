@@ -5,7 +5,7 @@ from flaskr.models import db, User, Security, Order, Match, Record, Side
 from flaskr.models import db
 from flask import Flask, request
 from flask_sock import Sock
-from .utils import process_websocket, process_http
+from .utils import process_websocket, process_http, process_input_internal
 
 
 def create_app(test_config=None):
@@ -107,12 +107,25 @@ def create_app(test_config=None):
 
     @app.route('/order', methods=['POST'])
     def post_order():
+        valid_orders = 0
+        global_result = ''
         payload = request.get_json()["AddOrderRequest"]
-        for payload_order in payload:
-            result = process_order(payload_order)
-        result = db.session.commit()
-        print(result)
-        return 'Payload read succesfully (maybe)...{}'
+        for idx, payload_order in enumerate(payload):
+            print(payload_order)
+            valid, data = process_input_internal(payload_order)
+            if valid:
+                valid_orders += 1
+                result = process_order(payload_order)
+                single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
+            else:
+                single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
+
+            global_result = global_result + single_result
+
+        if db.session.commit() == None:
+            global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+        print(global_result)
+        return global_result
 
     @socket.route('/websocket')
     def websocket(sock):
