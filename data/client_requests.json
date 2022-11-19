@@ -15,7 +15,7 @@
             "request": "Add",
             "security": "Twitter",
             "quantity": 1000,
-            "price": "5",
+            "price": 5,
             "side": "Sell"
         },
         {
@@ -33,16 +33,16 @@
             "request": "Add",
             "security": "Twitter",
             "quantity": 1000,
-            "price": "3",
+            "price": 3,
             "side": "Buy"
         },
         {
-            "timestamp": 34,
+            "timestamp": 4,
             "user": "Musk",
             "request": "Add",
             "security": "Twitter",
             "quantity": 500,
-            "price": "5",
+            "price": 5,
             "side": "Buy"
         }
     ]

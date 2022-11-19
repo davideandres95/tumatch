@@ -7,7 +7,8 @@ import hashlib
 
 app = Flask(__name__, template_folder="templates")
 
-order_book = dict()
+orderbook_history = dict()
+orderbook = dict()
 
 
 def update_sell_order_quantity(old, new):
@@ -46,43 +47,52 @@ def update_db(requests):
         hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
         hex_dig = hash_object.hexdigest()
 
-        if order_book.get(hex_dig) is None:
+        if orderbook_history.get(hex_dig) is None:
             print(
                 "Received Order Hash: "
                 + hex_dig
                 + ": [  UNIQUE  ] new order registeration: %s" % order_str
             )
-            order_book[hex_dig] = [requests["quantity"][idx], requests["price"][idx]]
+            orderbook_history[hex_dig] = [
+                [requests["quantity"][idx]],
+                [requests["price"][idx]],
+            ]
         else:
             print(
                 "Received Order Hash: "
                 + hex_dig
                 + ": [DUPLICATED] similar order found: %s" % order_str
             )
+            # new order override prev price
+            orderbook_history[hex_dig][0].append(requests["quantity"][idx])
+            orderbook_history[hex_dig][1].append(requests["price"][idx])
             if requests["side"][idx] == "Sell":
                 print(">> Updating the value of the previous Sell order..")
-                new_quantity = update_sell_order_quantity(
-                    order_book[hex_dig][0], requests["quantity"][idx]
+                requests.loc['quantity', idx] = update_sell_order_quantity(
+                    orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
                 )
-                new_price = update_sell_order_price(
-                    order_book[hex_dig][1], requests["price"][idx]
+                requests.loc['price', idx] = update_sell_order_price(
+                    orderbook_history[hex_dig][1][-1], requests["price"][idx]
                 )
-                order_book[hex_dig] = [new_quantity, new_price]
             else:  # buy
                 print(">> Updating the value of the previous Add order..")
-                new_quantity = update_buy_order_quantity(
-                    order_book[hex_dig][0], requests["quantity"][idx]
+                requests.loc['quantity', idx] = update_buy_order_quantity(
+                    orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
                 )
-                new_price = update_buy_order_price(
-                    order_book[hex_dig][1], requests["price"][idx]
+                requests.loc['price', idx] = update_buy_order_price(
+                    orderbook_history[hex_dig][1][-1], requests["price"][idx]
                 )
-                # new order override prev price
-                order_book[hex_dig] = [new_quantity, new_price]
             print(
                 "Order Updated to Quantity= {} and Price= {}".format(
-                    order_book[hex_dig][0], order_book[hex_dig][1]
+                    orderbook_history[hex_dig][0], orderbook_history[hex_dig][1]
                 )
             )
+    return orderbook_history
+
+
+def match(orderbook_history):
+    # for sec in orderbook_history[]
+    return orderbook_history
 
 
 def read_requests():
@@ -99,7 +109,11 @@ def requests_loading():
     print(requests)
 
     print("Filtered Orders:")
-    update_db(requests)
-    # TODO match()
+    requests = update_db(requests)
+    print(requests)
+
+    # print("Matched Orders:")
+    # orderbook_history = match(orderbook_history)
+    # print(orderbook_history)
 
     return "</p>Requests are loaded..</p>"
