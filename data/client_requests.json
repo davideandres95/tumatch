@@ -41,17 +41,8 @@
             "user": "Musk",
             "request": "Add",
             "security": "AAPL",
-            "quantity": 1000,
-            "price": 3,
-            "side": "Buy"
-        },
-        {
-            "timestamp": 4,
-            "user": "Musk",
-            "request": "Add",
-            "security": "AAPL",
-            "quantity": 500,
-            "price": 3,
+            "quantity": 4000,
+            "price": 6,
             "side": "Buy"
         }
     ]

@@ -76,10 +76,38 @@ def update_db(requests):
     return orderbook_history, requests
 
 def match(orderbook_history, requests):
-    for buy_request in orderbook_history['Buy']:
-        print(requests['price'][orderbook_history['Buy'][buy_request][0]]) # TODO could be saved directly to orderbook_history
-        price = requests['price'][orderbook_history['Buy'][buy_request][0]]
-    return orderbook_history
+    for buy_request_hash in orderbook_history['Buy']:
+        buy_index_in_requests = orderbook_history['Buy'][buy_request_hash][0]
+        # TODO could be saved directly to orderbook_history
+        buy_price = requests['price'][buy_index_in_requests] 
+        buy_quantity = requests['quantity'][buy_index_in_requests]
+        remaining = buy_quantity # TODO obsolete
+        # scan all sell orders
+        for sell_request_hash in orderbook_history['Sell']:
+            sell_index_in_requests = orderbook_history['Sell'][sell_request_hash][0]
+            sell_price = requests['price'][sell_index_in_requests] 
+            if sell_price > buy_price:
+                print("Bid Price is too low for seller to accept..")
+                print("This Seller is passing the offer..")
+                continue
+            sell_quantity = requests['quantity'][sell_index_in_requests]
+
+            remaining = sell_quantity - remaining
+            print("to buy: " + str(remaining))
+            print("to sell: " + str(sell_quantity))
+            print("buying quantity: " + str(buy_quantity))
+            print("selling quantity: " + str(sell_quantity))
+            if remaining > 0:
+                # asked buying total value is met
+                requests = requests.drop(labels=buy_index_in_requests, axis=0)
+                requests.loc[sell_index_in_requests, 'quantity'] = remaining # TODO recheck
+                break
+            else:
+                # asked selling total value is met
+                remaining = abs(remaining)
+                requests = requests.drop(labels=sell_index_in_requests, axis=0)
+                continue
+    return requests
 
 @app.route("/")
 def requests_loading():
