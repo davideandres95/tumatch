@@ -11,6 +11,14 @@
         {
             "request": "Add",
             "security": "Twitter",
+            "quantity": "2000",
+            "price": "2",
+            "side": "SELL",
+            "User": "Parag"
+        },
+        {
+            "request": "Add",
+            "security": "Twitter",
             "quantity": "1000",
             "price": "5",
             "side": "SELL",
@@ -21,7 +29,7 @@
             "security": "Twitter",
             "quantity": "1000",
             "price": "3",
-            "side": "Buy",
+            "side": "BUY",
             "User": "Musk"
         }
     ]

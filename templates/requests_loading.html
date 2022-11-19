@@ -1,3 +1,7 @@
 <h3>TUMatcher</h3>
 
-<p>Requests are being loaded:</p>
+<p>Requests are being loaded:</p> <div class="title">
+    {% for item in data %}
+        <span>{{ item.title }}</span>
+    {% endfor %}
+    </div>
