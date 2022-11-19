@@ -7,14 +7,24 @@ import hashlib
 
 app = Flask(__name__, template_folder="templates")
 
-orderbook_history = dict()
-orderbook = dict()
+# TODO generally move to object oriented
+orderbook_history = {"Sell": {}, "Buy": {}}
+
+
+def read_requests():
+    with open("./data/client_requests.json", "r") as myfile:
+        data = myfile.read()
+    return data
 
 # add-add is cumlative buy/sell
+
+
 def update_order_quantity(old, new):
     return old + new
 
+
 def update_db(requests):
+    del_requests = []
     for idx in requests.index:
         # TODO improve hashing alg, concatenation can fail if cols switched
         order_str = '"{}" requested "{}" of security "{}" with action "{}"'.format(
@@ -24,26 +34,31 @@ def update_db(requests):
             requests["side"][idx],
             requests["price"][idx]
         )
-        hash_seed = "{}{}{}{}{}".format(
+        hash_seed = "[{}]{}+{}+{}:{}".format(
             requests["user"][idx],
             requests["request"][idx],
             requests["security"][idx],
             requests["side"][idx],
             requests["price"][idx]
         )
-        print(hash_seed)
+
         hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
         hex_dig = hash_object.hexdigest()
-
-        if orderbook_history.get(hex_dig) is None:
+        
+        new_quantity = 0
+        request_type = requests["side"][idx]
+        calculated_index = idx
+        if orderbook_history[request_type].get(hex_dig) is None:
             print(
                 "Received Order Hash: "
                 + hex_dig
                 + ": [  UNIQUE  ] new order registration: %s" % order_str
             )
-            orderbook_history[hex_dig] = [
-                requests["quantity"][idx]
+            orderbook_history[request_type][hex_dig] = [
+                idx, [requests["quantity"][idx]]
             ]
+            new_quantity = requests["quantity"][idx]
+            calculated_index = idx
         else:
             print(
                 "Received Order Hash: "
@@ -51,30 +66,83 @@ def update_db(requests):
                 + ": [DUPLICATED] similar order found: %s" % order_str
             )
             # new order override prev price
-            orderbook_history[hex_dig].append(requests["quantity"][idx])
-            testt = update_order_quantity(
-                orderbook_history[hex_dig][0], requests["quantity"][idx]
+            orderbook_history[request_type][hex_dig][1].append(
+                requests["quantity"][idx])
+            new_quantity = update_order_quantity(
+                orderbook_history[request_type][hex_dig][1][0], requests["quantity"][idx]
             )
-            requests.loc[idx, 'quantity'] = testt
-            print(testt)
+            requests.loc[orderbook_history[request_type]
+                         [hex_dig][0], 'quantity'] = new_quantity
             print(
                 "The previous order's quantity is updated to= {}".format(
-                    orderbook_history[hex_dig]
+                    new_quantity
                 )
             )
-            # requests.drop(0, axis=0)
+            requests = requests.drop(labels=idx, axis=0)
+            # FIXME the index is alredy calculated why again?? calculated_index
+            calculated_index =  orderbook_history[request_type].get(hex_dig)[0]
+            # print("XXXX calculated_index= " + str(calculated_index))
+
+        if requests["request"][calculated_index] == "Del":
+            del_origin_hash_seed = "[{}]{}+{}+{}:{}".format(
+                requests["user"][idx],
+                "Add", # FIXME workaround TODO
+                requests["security"][idx],
+                requests["side"][idx],
+                requests["price"][idx]
+            )
+            del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
+            del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], new_quantity))
+
+    # print(del_requests)
+    # # Remove from Data base the Delete requests if they exist
+    # # TODO store locations of delete to improve perf
+    for delete_request_info  in del_requests:
+        print("Found a delete of index: " + str(delete_request_info[0]))
+        remaining = requests["quantity"][delete_request_info[0]] - delete_request_info[1]
+        if remaining > 0:
+            requests.loc[delete_request_info[0], 'quantity'] = remaining
+        else:
+            requests = requests.drop(labels=delete_request_info[0], axis=0)
+
+    return orderbook_history, requests
+
+
+def match(orderbook_history, requests):
+    for buy_request_hash in orderbook_history['Buy']:
+        buy_index_in_requests = orderbook_history['Buy'][buy_request_hash][0]
+        # TODO could be saved directly to orderbook_history
+        buy_price = requests['price'][buy_index_in_requests]
+        buy_quantity = requests['quantity'][buy_index_in_requests]
+        remaining = buy_quantity  # TODO obsolete
+        print("to buy: " + str(abs(remaining)))
+        # scan all sell orders
+        for sell_request_hash in orderbook_history['Sell']:
+            sell_index_in_requests = orderbook_history['Sell'][sell_request_hash][0]
+            sell_price = requests['price'][sell_index_in_requests]
+            if sell_price > buy_price:
+                print("Bid Price is too low for seller to accept..")
+                print("This Seller is passing the offer..")
+                continue
+            sell_quantity = requests['quantity'][sell_index_in_requests]
+
+            remaining = sell_quantity - remaining
+            # print("to buy remaining: " + str(abs(remaining)))
+            # print("to sell: " + str(sell_quantity))
+            # print("buying quantity: " + str(buy_quantity))
+            # print("selling quantity: " + str(sell_quantity))
+            if remaining > 0:
+                # asked buying total value is met
+                requests = requests.drop(labels=buy_index_in_requests, axis=0)
+                requests.loc[sell_index_in_requests,
+                             'quantity'] = remaining  # TODO recheck
+                break
+            else:
+                # asked selling total value is met
+                remaining = abs(remaining)
+                requests = requests.drop(labels=sell_index_in_requests, axis=0)
+                continue
     return requests
-
-
-def match(orderbook_history):
-    # for sec in orderbook_history[]
-    return orderbook_history
-
-
-def read_requests():
-    with open("./data/client_requests.json", "r") as myfile:
-        data = myfile.read()
-    return data
 
 
 @app.route("/")
@@ -84,12 +152,12 @@ def requests_loading():
     print("Requested Orders:")
     print(requests)
 
+    orderbook_history, requests = update_db(requests)
     print("Filtered Orders:")
-    requests = update_db(requests)
     print(requests)
 
-    # print("Matched Orders:")
-    # orderbook_history = match(orderbook_history)
-    # print(orderbook_history)
+    requests = match(orderbook_history, requests)
+    print("Matched Orders:")
+    print(requests)
 
     return "</p>Requests are loaded..</p>"
