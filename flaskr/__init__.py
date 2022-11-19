@@ -1,6 +1,7 @@
 import os, enum
 
-from flaskr.models import db, User, Security, Order, Match, Record
+from werkzeug.security import generate_password_hash
+from flaskr.models import db, User, Security, Order, Match, Record, Side
 from flaskr.models import db
 from flask import Flask, request
 from flask_sock import Sock
@@ -37,9 +38,19 @@ def create_app(test_config=None):
 
     with app.app_context():
         db.create_all()
-        user_david = User(name='David')
-        db.session.add(user_david)
-        db.session.commit()
+        david = User.query.filter_by(name='David').first()
+        jnpr = Security.query.filter_by(name='JNPR').first()
+        sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100) 
+        if Order.query.get(1) == None:
+            db.session.add(sell_order_1)
+            db.session.commit()
+
+        if david == None:
+            password_hash = generate_password_hash("D@avid123", "sha256")
+            user_david = User(name='David', password=password_hash)
+            db.session.add(user_david, sell_order_1)
+
+            db.session.commit()
 
     # a simple page that says hello
     @app.route('/http', methods=['POST', 'GET'])

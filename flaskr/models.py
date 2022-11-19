@@ -1,6 +1,7 @@
 import enum
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.sql import func
 
 db = SQLAlchemy()
@@ -14,8 +15,10 @@ class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True),
             server_default=func.now())
+    __table_args__ = (UniqueConstraint('name', name='name_uc'),)
     def __repr__(self):
         return f'<User {self.name}>'
 
@@ -40,7 +43,7 @@ class Order(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
-        return f'<Order: {self.side} {self.user.name} {self.security.name} {self.quantity}>'
+        return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
 
 class Match(db.Model):
     __tablename__ = 'match'
