@@ -10,24 +10,9 @@ app = Flask(__name__, template_folder="templates")
 orderbook_history = dict()
 orderbook = dict()
 
-
-def update_sell_order_quantity(old, new):
-    # TODO fix the quantity
-    # TODO fix the price
-    return min(old, new)
-
-
-def update_sell_order_price(old, new):
-    return new
-
-
-def update_buy_order_quantity(old, new):
+# add-add is cumlative buy/sell
+def update_order_quantity(old, new):
     return old + new
-
-
-def update_buy_order_price(old, new):
-    return new
-
 
 def update_db(requests):
     for idx in requests.index:
@@ -37,13 +22,16 @@ def update_db(requests):
             requests["request"][idx],
             requests["security"][idx],
             requests["side"][idx],
+            requests["price"][idx]
         )
-        hash_seed = "{}{}{}{}".format(
+        hash_seed = "{}{}{}{}{}".format(
             requests["user"][idx],
             requests["request"][idx],
             requests["security"][idx],
             requests["side"][idx],
+            requests["price"][idx]
         )
+        print(hash_seed)
         hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
         hex_dig = hash_object.hexdigest()
 
@@ -51,11 +39,10 @@ def update_db(requests):
             print(
                 "Received Order Hash: "
                 + hex_dig
-                + ": [  UNIQUE  ] new order registeration: %s" % order_str
+                + ": [  UNIQUE  ] new order registration: %s" % order_str
             )
             orderbook_history[hex_dig] = [
-                [requests["quantity"][idx]],
-                [requests["price"][idx]],
+                requests["quantity"][idx]
             ]
         else:
             print(
@@ -64,30 +51,18 @@ def update_db(requests):
                 + ": [DUPLICATED] similar order found: %s" % order_str
             )
             # new order override prev price
-            orderbook_history[hex_dig][0].append(requests["quantity"][idx])
-            orderbook_history[hex_dig][1].append(requests["price"][idx])
-            # requests.drop(requests.index[1])
-            if requests["side"][idx] == "Sell":
-                print(">> Updating the value of the previous Sell order..")
-                requests.loc[idx, 'quantity', ] = update_sell_order_quantity(
-                    orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
-                )
-                requests.loc[idx, 'price'] = update_sell_order_price(
-                    orderbook_history[hex_dig][1][-1], requests["price"][idx]
-                )
-            else:  # buy
-                print(">> Updating the value of the previous Add order..")
-                requests.loc[idx, 'quantity', ] = update_buy_order_quantity(
-                    orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
-                )
-                requests.loc[idx, 'price'] = update_buy_order_price(
-                    orderbook_history[hex_dig][1][-1], requests["price"][idx]
-                )
+            orderbook_history[hex_dig].append(requests["quantity"][idx])
+            testt = update_order_quantity(
+                orderbook_history[hex_dig][0], requests["quantity"][idx]
+            )
+            requests.loc[idx, 'quantity'] = testt
+            print(testt)
             print(
-                "Order Updated to Quantity= {} and Price= {}".format(
-                    orderbook_history[hex_dig][0], orderbook_history[hex_dig][1]
+                "The previous order's quantity is updated to= {}".format(
+                    orderbook_history[hex_dig]
                 )
             )
+            # requests.drop(0, axis=0)
     return requests
 
 
