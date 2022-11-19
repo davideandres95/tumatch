@@ -81,7 +81,7 @@ def update_db(requests):
             requests = requests.drop(labels=idx, axis=0)
             # FIXME the index is alredy calculated why again?? calculated_index
             calculated_index =  orderbook_history[request_type].get(hex_dig)[0]
-            print("XXXX calculated_index= " + str(calculated_index))
+            # print("XXXX calculated_index= " + str(calculated_index))
 
         if requests["request"][calculated_index] == "Del":
             del_origin_hash_seed = "[{}]{}+{}+{}:{}".format(
@@ -94,7 +94,7 @@ def update_db(requests):
             del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
             del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], new_quantity))
 
-    print(del_requests)
+    # print(del_requests)
     # # Remove from Data base the Delete requests if they exist
     # # TODO store locations of delete to improve perf
     for delete_request_info  in del_requests:
@@ -127,10 +127,10 @@ def match(orderbook_history, requests):
             sell_quantity = requests['quantity'][sell_index_in_requests]
 
             remaining = sell_quantity - remaining
-            print("to buy remaining: " + str(abs(remaining)))
-            print("to sell: " + str(sell_quantity))
-            print("buying quantity: " + str(buy_quantity))
-            print("selling quantity: " + str(sell_quantity))
+            # print("to buy remaining: " + str(abs(remaining)))
+            # print("to sell: " + str(sell_quantity))
+            # print("buying quantity: " + str(buy_quantity))
+            # print("selling quantity: " + str(sell_quantity))
             if remaining > 0:
                 # asked buying total value is met
                 requests = requests.drop(labels=buy_index_in_requests, axis=0)
