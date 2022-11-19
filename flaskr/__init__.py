@@ -58,8 +58,26 @@ def create_app(test_config=None):
     def process_delete_order(payload_order):
         return True
 
-    def process_update_order(payload_order):
-        return True
+    def process_update_order(payload_order, hex_dig):
+        quantity_text = payload_order["quantity"]
+        previous = Order.query.filter_by(u_idx=hex_dig).first()
+        previous.quantity = int(quantity_text)
+        #db.session.commit()
+
+        #db.session.add(previous)
+        #candidate = db.session.query(Order).filter(Order.u_idx == hex_dig).one().u_idx
+        #print(candidate==hex_dig)
+        #db.session.query(Order).filter(Order.u_idx == hex_dig).\
+        #update({'quantity': int(quantity_text)}, synchronize_session='fetch')
+
+    def log_order(payload_order):
+        user_text = payload_order["user"]
+        payload_text = str(payload_order)
+        user_id = User.query.filter_by(name=user_text).first().id
+        log = Record(user_id=user_id, payload=payload_text)
+        db.session.add(log)
+        print('order prepared for log')
+        
 
     def process_order(payload_order):
         if payload_order["request"] == "Del":
@@ -75,7 +93,7 @@ def create_app(test_config=None):
             security_id = Security.query.filter_by(name=security_text).first().id
             user_id = User.query.filter_by(name=user_text).first().id
             print(Side[side_text.lower()].name)
-            hash_seed = str(user_id) + str(security_id) + Side[side_text.lower()].name + str(price_text) + str(quantity_text)
+            hash_seed = str(user_id) + str(security_id) + Side[side_text.lower()].name + str(price_text)
             hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
             hex_dig = hash_object.hexdigest()
 
@@ -83,15 +101,14 @@ def create_app(test_config=None):
                 candidate_order = Order(side=Side[side_text.lower()], user_id=user_id, security_id=security_id, quantity=int(quantity_text), price=int(price_text), u_idx=hex_dig) 
                 db.session.add(candidate_order)
             else:
-                process_update_order(payload_order)
+                process_update_order(payload_order, hex_dig)
                 print('Order already exists, it should be updated')
 
+            log_order(payload_order)
 
     # a simple page that says hello
-    @app.route('/http', methods=['POST', 'GET'])
-    def http():
-        valid = process_http(request)
-        print(valid)
+    @app.route('/hello')
+    def hello_world():
         return 'Hello, World!'
 
     @app.route('/User')
@@ -111,7 +128,6 @@ def create_app(test_config=None):
         global_result = ''
         payload = request.get_json()["AddOrderRequest"]
         for idx, payload_order in enumerate(payload):
-            print(payload_order)
             valid, data = process_input_internal(payload_order)
             if valid:
                 valid_orders += 1
