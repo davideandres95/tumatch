@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AuthContext = React.createContext({isAuth:false,token : "", 
+const AuthContext = React.createContext({isAuth:false, token : "", 
                                     setAuth: () => {}})
 
 export default (props) => {
@@ -8,9 +8,11 @@ export default (props) => {
     const [token, setToken] = React.useState(localStorage.getItem("token"))
     React.useEffect(() => {
         localStorage.setItem("isAuth", isAuth)
-    }, [isAuth]);
+        localStorage.setItem("token", token)
+
+    }, [isAuth, token]);
     return (
-        <AuthContext.Provider value={{isAuth, token, setAuth}}>
+        <AuthContext.Provider value={{isAuth, setAuth, token, setToken}}>
             {props.children}
         </AuthContext.Provider>
     )

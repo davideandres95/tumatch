@@ -4,13 +4,27 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AuthContext from './Context';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import axios from 'axios'; 
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
+axios.defaults.baseURL = 'http://localhost:5000/http/';
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <AuthContext>
-      <App/>  
-    </AuthContext>
+    <ThemeProvider theme={darkTheme}>
+      <AuthContext>
+        <App/>  
+      </AuthContext>
+    </ThemeProvider>
   </React.StrictMode>
 );
 

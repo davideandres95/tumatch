@@ -12,8 +12,6 @@ import Chart from './Chart';
 import Orders from './Orders';
 import Button from '@mui/material/Button';
 
-const drawerWidth = 240;
-
 const mdTheme = createTheme();
 
 function DashboardContent() {

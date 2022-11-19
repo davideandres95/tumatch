@@ -10,6 +10,7 @@ import {
   Route
 } from "react-router-dom";
 
+
 function App (props) {
   const {isAuth,} = React.useContext(getContext());
   return (
@@ -21,7 +22,7 @@ function App (props) {
             isAuth ? <Homepage/> : <Auth/>
         }/>
         <Route path="/" element={
-          !isAuth && <Homepage/>
+          isAuth && <Homepage/>
         }/>
       </Routes>
     </Router>
