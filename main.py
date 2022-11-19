@@ -66,20 +66,21 @@ def update_db(requests):
             # new order override prev price
             orderbook_history[hex_dig][0].append(requests["quantity"][idx])
             orderbook_history[hex_dig][1].append(requests["price"][idx])
+            # requests.drop(requests.index[1])
             if requests["side"][idx] == "Sell":
                 print(">> Updating the value of the previous Sell order..")
-                requests.loc['quantity', idx] = update_sell_order_quantity(
+                requests.loc[idx, 'quantity', ] = update_sell_order_quantity(
                     orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
                 )
-                requests.loc['price', idx] = update_sell_order_price(
+                requests.loc[idx, 'price'] = update_sell_order_price(
                     orderbook_history[hex_dig][1][-1], requests["price"][idx]
                 )
             else:  # buy
                 print(">> Updating the value of the previous Add order..")
-                requests.loc['quantity', idx] = update_buy_order_quantity(
+                requests.loc[idx, 'quantity', ] = update_buy_order_quantity(
                     orderbook_history[hex_dig][0][-1], requests["quantity"][idx]
                 )
-                requests.loc['price', idx] = update_buy_order_price(
+                requests.loc[idx, 'price'] = update_buy_order_price(
                     orderbook_history[hex_dig][1][-1], requests["price"][idx]
                 )
             print(
@@ -87,7 +88,7 @@ def update_db(requests):
                     orderbook_history[hex_dig][0], orderbook_history[hex_dig][1]
                 )
             )
-    return orderbook_history
+    return requests
 
 
 def match(orderbook_history):
