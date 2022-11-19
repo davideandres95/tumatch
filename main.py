@@ -127,10 +127,10 @@ def match(orderbook_history, requests):
             sell_quantity = requests['quantity'][sell_index_in_requests]
 
             remaining = sell_quantity - remaining
-            # print("to buy remaining: " + str(abs(remaining)))
-            # print("to sell: " + str(sell_quantity))
-            # print("buying quantity: " + str(buy_quantity))
-            # print("selling quantity: " + str(sell_quantity))
+            print("to buy remaining: " + str(abs(remaining)))
+            print("to sell: " + str(sell_quantity))
+            print("buying quantity: " + str(buy_quantity))
+            print("selling quantity: " + str(sell_quantity))
             if remaining > 0:
                 # asked buying total value is met
                 requests = requests.drop(labels=buy_index_in_requests, axis=0)
@@ -140,6 +140,8 @@ def match(orderbook_history, requests):
             else:
                 # asked selling total value is met
                 remaining = abs(remaining)
+                requests.loc[buy_index_in_requests,
+                             'quantity'] = remaining  # TODO recheck
                 requests = requests.drop(labels=sell_index_in_requests, axis=0)
                 continue
     return requests
