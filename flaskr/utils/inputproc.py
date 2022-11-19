@@ -37,11 +37,19 @@ def process_http(request: object):
     content_type = request.headers.get('Content-Type')
     print(request.headers, request.form)
     if (content_type.startswith('application/json')):
-        return process_input_internarmalize_dict(request.get_data())
+        return process_input_internal(normalize_dict(request.get_json()))
     elif (content_type.startswith('multipart/form-data')):
         return process_input_internal(normalize_dict(request.form.to_dict(flat=True)))
     else:
         return (False, 'Content-Type not supported')
+
+def process_auth(request: object):
+    data = normalize_dict(request.get_json())
+    keys = list(data.keys()).copy()
+    keys.sort()
+    if keys != [ 'password', 'username']:
+        return (False, "Invalid format")
+    return (True, data)    
 
 
 def parse_string(request: str):
