@@ -3,11 +3,20 @@
         {
             "timestamp": 0,
             "user": "Parag",
-            "request": "Del",
+            "request": "Add",
             "security": "AAPL",
-            "quantity": 3000,
+            "quantity": 1000,
             "price": 2,
-            "side": "Sell"
+            "side": "Buy"
+        },
+        {
+            "timestamp": 2,
+            "user": "Parag",
+            "request": "Add",
+            "security": "AAPL",
+            "quantity": 1000,
+            "price": 2,
+            "side": "Buy"
         },
         {
             "timestamp": 2,
@@ -16,7 +25,7 @@
             "security": "AAPL",
             "quantity": 1000,
             "price": 2,
-            "side": "Sell"
-        }  
+            "side": "Buy"
+        }   
     ]
 }
