@@ -55,3 +55,7 @@ def extract_user(token: str):
 def buy(username, quantity, security, price):
     #TODO implement is
     return None
+
+def sell(username, quantity, security, price):
+    #TODO implement is
+    return None

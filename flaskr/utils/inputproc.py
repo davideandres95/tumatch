@@ -37,11 +37,14 @@ def process_input_internal(request: dict):
                 return (False, "Invalid format: Side must be [buy, sell, del]")
             if (isinstance(request['quantity'],  int) is False) and (request['quantity'].isdigit() is False or int(request['quantity']) <= 0):
                 return (False, "Invalid format: Quantity must be a positive integer")
-            if (isinstance(request['price'],  int) is False) and (request['price'].isdigit() is False or int(request['price']) <= 0):
+            if request['price'] != "MARKET" and \
+                ((isinstance(request['price'],  int) is False) and \
+                (request['price'].isdigit() is False or int(request['price']) <= 0)):
                 return (False, "Invalid format: Price must be a positive integer")
             if len(request['user']) < 3:
                 return (False, "Invalid format: User invalid (too short or missing)")
-            if len(request['security']) <= 2:
+            print(request['security'])
+            if len(request['security']) <= 0:
                 return (False, "Invalid format: Security invalid (too short or missing)")
         return (True, request)
     except:

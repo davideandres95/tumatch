@@ -10,7 +10,7 @@ from flask_cors import CORS
 from threading import Thread
 from flask import abort
 
-from .api import register, login, extract_user
+from .api import register, login, extract_user, buy, sell
 
 def create_app(test_config=None):
     # create and configure the app
@@ -179,8 +179,9 @@ def create_app(test_config=None):
     def http():
         valid, data = process_http(request)
         if valid is False:
-            abort(400, {"msg": data}) 
-        return buy()
+            abort(400, {"msg": data})
+        return buy(data['user'], data['quantity'], data['security'], data['price']) \
+            if data['request'] == 'buy' else sell(data['user'], data['quantity'], data['security'], data['price'])
     
     @app.route('/http/auth/register', methods=['POST'])
     def http_register():
@@ -204,9 +205,9 @@ def create_app(test_config=None):
     @app.route('/http/securities', methods=['GET'])
     def get_securities():
         securities = Security.query.all()
-        result = jsonify(json_list = [security.as_dict() for security in securities])
+        result = jsonify([{'label': security.as_dict()['name']} for security in securities])
         print(result)
-        return (200, result)
+        return (result, 200)
     
     def websocket_client(arg):
         for i in range(arg):

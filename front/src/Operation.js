@@ -12,10 +12,12 @@ import axios from 'axios';
 import Alert from '@mui/material/Alert';
 import {getContext} from './Context';
 import Checkbox from '@mui/material/Checkbox';
+import Autocomplete from '@mui/material/Autocomplete';
 
 export default function FormDialog(props) {
   const [op, setOp] = React.useState('');
   const [cb, setCb] = React.useState(1);
+  const [dataAC, setDataAC] = React.useState("");
 
   const [errorMsg, setErrorMsg] = React.useState("");
   const {isAuth, setAuth, token, setToken} = React.useContext(getContext());
@@ -25,7 +27,6 @@ export default function FormDialog(props) {
     axios.get("/securities", {}).catch((error) => {setErrorMsg("Network error")}).then((response) => {
       if(response != undefined) {
         setSecurities(response.data);
-        console.log(securities);
       }    
     }); 
   }
@@ -39,11 +40,11 @@ export default function FormDialog(props) {
     } else if (data.get('quantity') <= 0) {
       setErrorMsg("Quantity amount must be positive")
       return false;
-    } else if (data.get('price') <= 0 && cb == 1) {
+    } else if (data.get('price') <= 0 && cb == -1) {
       setErrorMsg("Price must be positive")
       return false;
-    } else if (data.get('securities').length <= 2) {
-      setErrorMsg("Security length must be longer than 2")
+    } else if (dataAC == "") {
+      setErrorMsg("Must select a security")
       return false
     }
     return true;
@@ -55,13 +56,13 @@ export default function FormDialog(props) {
     if(validate(data) == false){
       return;
     }
-    const price = cb == 1 ? data.get('price') : "MARKET";
+    const price = cb == -1 ? data.get('price') : "MARKET";
     axios.post("", {
       'request': 'ADD',
       'side': op,
       'quantity': data.get('quantity'),
       'price': price,
-      'security': data.get('securities'),
+      'security': dataAC,
       'user_token': token
     }).catch((error) => {setErrorMsg(error.message)}).then((response) => {
       if(response != undefined) {
@@ -94,7 +95,7 @@ export default function FormDialog(props) {
             />
           </Grid>
           <Grid item container xs={12}>
-            <Grid item xs={6} sx={{'margin-top': 20}}>
+            <Grid item xs={6} sx={{'marginTop': 3}}>
               Default Market price: 
               <Checkbox defaultChecked onChange={()=>{setCb(cb*-1)}} />
             </Grid>
@@ -112,22 +113,21 @@ export default function FormDialog(props) {
             </Grid>
           </Grid>
           <Grid item container xs={12}>
-            <Grid item xs={6}>
-              Security:
-              <Select
-                  sx={{'margin-left': 10}}
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={op}
-                  label="Operation"
-                  onChange={handleChange}
-                >
-              </Select>
+            <Grid item container xs={6}>
+              <p>Security:</p>
+              <Autocomplete
+                disablePortal
+                onChange={(event) => setDataAC(event.target.outerText)}
+                id="securities"
+                options={securities}
+                sx={{ width: 150, 'marginLeft': 1 }}
+                renderInput={(params) => <TextField {...params} label="Securities" />}
+              />
             </Grid>
             <Grid item xs={6}>
               Operation: 
               <Select
-                sx={{'margin-left': 10}}
+                sx={{'marginLeft': 1}}
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={op}
