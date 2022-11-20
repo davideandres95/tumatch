@@ -55,20 +55,16 @@ def create_app(test_config=None):
 
             db.session.commit()
 
-    def process_delete_order(payload_order):
-        return True
+    def process_delete_order(payload_order, hex_dig):
+        target = Order.query.filter_by(u_idx=hex_dig).order_by(Order.created_at.desc()).first()
+        if ( target != None):
+            db.session.delete(target)
+            print('INFO: an order was deleted')
 
     def process_update_order(payload_order, hex_dig):
         quantity_text = payload_order["quantity"]
         previous = Order.query.filter_by(u_idx=hex_dig).first()
         previous.quantity = int(quantity_text)
-        #db.session.commit()
-
-        #db.session.add(previous)
-        #candidate = db.session.query(Order).filter(Order.u_idx == hex_dig).one().u_idx
-        #print(candidate==hex_dig)
-        #db.session.query(Order).filter(Order.u_idx == hex_dig).\
-        #update({'quantity': int(quantity_text)}, synchronize_session='fetch')
 
     def log_order(payload_order):
         user_text = payload_order["user"]
@@ -80,23 +76,22 @@ def create_app(test_config=None):
         
 
     def process_order(payload_order):
-        if payload_order["request"] == "Del":
-            process_delete_order(payload_order)
-        elif payload_order["request"] == "Add":
-            user_text = payload_order["user"]
-            security_text = payload_order["security"]
-            side_text = payload_order["side"]
-            price_text = payload_order["price"]
-            quantity_text = payload_order["quantity"]
+        type_text = payload_order["request"]
+        user_text = payload_order["user"]
+        security_text = payload_order["security"]
+        side_text = payload_order["side"]
+        price_text = payload_order["price"]
+        quantity_text = payload_order["quantity"]
 
+        security_id = Security.query.filter_by(name=security_text).first().id
+        user_id = User.query.filter_by(name=user_text).first().id
+        hash_seed = str(user_id) + str(security_id) + Side[side_text.lower()].name + str(price_text)
+        hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
+        hex_dig = hash_object.hexdigest()
 
-            security_id = Security.query.filter_by(name=security_text).first().id
-            user_id = User.query.filter_by(name=user_text).first().id
-            print(Side[side_text.lower()].name)
-            hash_seed = str(user_id) + str(security_id) + Side[side_text.lower()].name + str(price_text)
-            hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
-            hex_dig = hash_object.hexdigest()
-
+        if  type_text == "Del":
+            process_delete_order(payload_order, hex_dig)
+        elif type_text == "Add":
             if (Order.query.filter_by(u_idx=hex_dig).first() == None):
                 candidate_order = Order(side=Side[side_text.lower()], user_id=user_id, security_id=security_id, quantity=int(quantity_text), price=int(price_text), u_idx=hex_dig) 
                 db.session.add(candidate_order)
@@ -104,7 +99,7 @@ def create_app(test_config=None):
                 process_update_order(payload_order, hex_dig)
                 print('Order already exists, it should be updated')
 
-            log_order(payload_order)
+        log_order(payload_order)
 
     # a simple page that says hello
     @app.route('/hello')
