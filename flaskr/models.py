@@ -64,6 +64,8 @@ class Match(db.Model):
     created_at = db.Column(db.DateTime(timezone=True),
             server_default=func.now())
     sell_id = db.Column(db.Integer, db.ForeignKey('order.id'))
+    security_id = db.Column(db.Integer, db.ForeignKey('security.id'))
+    security = db.relationship("Security", backref="match", lazy=False)
     buy_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)

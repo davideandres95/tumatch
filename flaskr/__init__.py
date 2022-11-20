@@ -40,23 +40,6 @@ def create_app(test_config=None):
     with app.app_context():
         db.create_all()
 
-        david = User.query.filter_by(name='David').first()
-        if david == None:
-            password_hash = generate_password_hash("D@avid123", "sha256")
-            david = User(name='David', password=password_hash)
-            db.session.add(david)
-
-        jnpr = Security.query.filter_by(name='JNPR').first()
-        hash_seed = str(david.id) + str(jnpr.id) + Side.buy.name + "5" + "100"
-        hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
-        hex_dig = hash_object.hexdigest()
-        sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100, price=5, u_idx=hex_dig) 
-
-        if Order.query.get(1) == None:
-            db.session.add(sell_order_1)
-
-        db.session.commit()
-
     def process_delete_order(payload_order, hex_dig):
         target = Order.query.filter_by(u_idx=hex_dig).order_by(Order.created_at.desc()).first()
         quantity = int(payload_order["quantity"])
@@ -127,7 +110,7 @@ def create_app(test_config=None):
                 else:
                     remaining = order.quantity - buy_order.quantity #might be negative!
                     if (remaining > 0):
-                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=buy_order.quantity, price=order.price)
+                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=buy_order.quantity, price=order.price, security_id=order.security_id)
                         db.session.add(result_match)
                         order.quantity = remaining
                         db.session.delete(buy_order)
@@ -135,7 +118,7 @@ def create_app(test_config=None):
                         break
 
                     else:
-                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=order.quantity, price=order.price)
+                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=order.quantity, price=order.price, security_id=order.security_id)
                         db.session.add(result_match)
                         remaining = abs(remaining)
                         buy_order.quantity = remaining
@@ -152,7 +135,7 @@ def create_app(test_config=None):
                 else:
                     remaining = sell_order.quantity - order.quantity #might be negative!
                     if (remaining > 0):
-                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=order.quantity, price=sell_order.price)
+                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=order.quantity, price=sell_order.price, security_id=order.security_id)
                         db.session.add(result_match)
                         sell_order.quantity = remaining
                         db.session.delete(sell_order)
@@ -160,7 +143,7 @@ def create_app(test_config=None):
                         break
 
                     else:
-                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=sell_order.quantity, price=sell_order.price)
+                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=sell_order.quantity, price=sell_order.price, security_id=order.security_id)
                         db.session.add(result_match)
                         remaining = abs(remaining)
                         order.quantity = remaining
@@ -232,13 +215,18 @@ def create_app(test_config=None):
         response_dict['matches'] = [match.as_dict() for match in matches]
         return response_dict, 200
 
-    @app.route('/order', methods=['GET','POST'])
+    @app.route('/order/<order_id>', methods=['GET'])
+    def get_order_by_id(order_id):
+        order = Order.query.filter_by(id=order_id).first()
+        return order.as_dict(), 200
+
+    @app.route('/order', methods=['POST'])
     def place_order():
         valid_orders = 0
         global_result = ''
         response_dict = {}
 
-        if request.method == 'POST':
+        if list(request.get_json().keys())[0] == "AddOrderRequest":
             payload = request.get_json()["AddOrderRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
@@ -260,8 +248,15 @@ def create_app(test_config=None):
 
             #response_dict['global_result'] = global_result + 'INFO: Checking for matches... \n'
             return response_dict, 200
+        else:
+            return 'BAD PAYLOAD', 400
 
-        if request.method == 'GET':
+    @app.route('/get_order_batch', methods=['POST'])
+    def get_order_batch():
+        response_dict = {}
+        valid_orders = 0
+        global_result = ''
+        if list(request.get_json().keys())[0] == "ListOrdersRequest":
             payload = request.get_json()["ListOrdersRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
@@ -279,9 +274,8 @@ def create_app(test_config=None):
             global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
             print(global_result)
             return response_dict, 200
-
-
-        
+        else:
+            return 'BAD PAYLOAD', 400
 
     @socket.route('/websocket/<token>')
     def websocket(sock, token):
