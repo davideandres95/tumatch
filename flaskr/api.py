@@ -1,5 +1,6 @@
 from flaskr.models import db, User, Security, Order, Match, Record, Side
 from  werkzeug.security import generate_password_hash, check_password_hash
+from flask import abort
 import jwt
 import base64
 
@@ -53,7 +54,12 @@ def extract_user(token: str):
 
 # DEFINE APIs
 def buy(username, quantity, security, price):
-    #TODO implement is
+    success_order = process_order(payload_order)
+    if success_order:
+        match_result = process_match(success_order)
+        single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
+    else:
+        single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
     return None
 
 def sell(username, quantity, security, price):

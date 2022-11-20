@@ -23,14 +23,9 @@ export default function FormDialog(props) {
   const performeOperation = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    axios.post("", {
-      'request': 'ADD',
-      'side': op,
-      'quantity': data.get('quantity'),
-      'price': data.get('price'),
-      'security': data.get('securities'),
-      'user_token': token
-    }).catch((error) => {setErrorMsg(error.message)}).then((response) => {
+    axios.post("", content, {headers: {
+      'Content-Type': 'application/json',
+    }}).catch((error) => {setErrorMsg(error.message)}).then((response) => {
       if(response != undefined) {
         this.close()
       }    
@@ -68,7 +63,10 @@ export default function FormDialog(props) {
               readOnly={readOnly}
               onChange={setContent}
             />
-          </div>
+        </div>
+        <div>
+          {errorMsg!="" && <Alert severity='error'>{errorMsg}</Alert>}
+        </div>
         <DialogActions>
           <Button variant="contained" type="submit">Perform</Button>
         </DialogActions>

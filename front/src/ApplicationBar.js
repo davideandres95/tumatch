@@ -42,7 +42,7 @@ export default function ApplicationBar() {
         </Toolbar>
       </AppBar>
       <Dialog open={open} fullWidth onClose={() => setOpen(false)}>
-        <Operation/>
+        <Operation value={setOpen}/>
       </Dialog>
       <Dialog open={bopen} fullWidth onClose={() => setBOpen(false)}>
         <BOperations/>
