@@ -57,13 +57,15 @@ export default function FormDialog(props) {
       return;
     }
     const price = cb == -1 ? data.get('price') : "MARKET";
-    axios.post("", {
-      'request': 'ADD',
-      'side': op,
-      'quantity': data.get('quantity'),
-      'price': price,
-      'security': dataAC,
-      'user_token': token
+    axios.post("/order", {
+      "AddOrderRequest" : {
+        'request': 'ADD',
+        'side': op,
+        'quantity': data.get('quantity'),
+        'price': price,
+        'security': dataAC,
+        'user_token': token
+      }
     }).catch((error) => {setErrorMsg(error.message)}).then((response) => {
       if(response != undefined) {
         this.close()

@@ -11,8 +11,11 @@ from threading import Thread
 from flask import abort
 
 from .api import register, login, extract_user, buy, sell
+export_datamatch, export_dataorder = "", ""
 
 def create_app(test_config=None):
+    global export_datamatch, export_dataorder
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
@@ -168,7 +171,8 @@ def create_app(test_config=None):
                         db.session.delete(order)
                         print('INFO: There was a match')
                         break
-
+    export_datamatch = process_match
+    export_dataorder = process_order
 
     # a simple page that says hello
     @app.route('/hello')
@@ -219,7 +223,7 @@ def create_app(test_config=None):
     def process_history():
         pass
 
-    @app.route('/order', methods=['GET','POST'])
+    @app.route('/http/order', methods=['GET','POST'])
     def place_order():
         valid_orders = 0
         global_result = ''
