@@ -10,6 +10,10 @@ import Paper from '@mui/material/Paper';
 import Link from '@mui/material/Link';
 import Chart from './Chart';
 import Orders from './Orders';
+import AllOrders from './AllOrders';
+import MatchedOrders from './MatchedOrders';
+
+import PersonalOrders from './PersonalOrders';
 import Button from '@mui/material/Button';
 
 const mdTheme = createTheme();
@@ -53,22 +57,22 @@ function DashboardContent() {
               {/* Recent Orders */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <h1>Your active orders</h1>
-                  <Orders />
-                </Paper>
-              </Grid>
-              {/* Recent Orders */}
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <h1>Your transactions</h1>
-                  <Orders />
+                  <h1>Your orders</h1>
+                  <PersonalOrders />
                 </Paper>
               </Grid>
               {/* All Orders */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <h1>All transactions</h1>
-                  <Orders />
+                  <h1>All orders</h1>
+                  <AllOrders />
+                </Paper>
+              </Grid>
+              {/* Recent Orders */}
+              <Grid item xs={12}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                  <h1>Matched orders</h1>
+                  <MatchedOrders />
                 </Paper>
               </Grid>
             </Grid>

@@ -17,7 +17,7 @@ def process_input_internal(request: dict):
             return (False, 'Invalid function')
         if request_type == 'list':
             return (True, ['list']) if len(request.keys()) == 2 else (False, "Invalid Format")
-        elif request_type == 'add':
+        elif request_type in ['add', 'del']:
             keys = list(request.keys()).copy()
             keys.sort()
 

@@ -1,5 +1,6 @@
 from flaskr.models import db, User, Security, Order, Match, Record, Side
 from  werkzeug.security import generate_password_hash, check_password_hash
+from flask import abort
 import jwt
 import base64
 

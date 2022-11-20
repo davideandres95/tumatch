@@ -42,23 +42,6 @@ def create_app(test_config=None):
     with app.app_context():
         db.create_all()
 
-        david = User.query.filter_by(name='David').first()
-        if david == None:
-            password_hash = generate_password_hash("D@avid123", "sha256")
-            david = User(name='David', password=password_hash)
-            db.session.add(david)
-
-        jnpr = Security.query.filter_by(name='JNPR').first()
-        hash_seed = str(david.id) + str(jnpr.id) + Side.buy.name + "5" + "100"
-        hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
-        hex_dig = hash_object.hexdigest()
-        sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100, price=5, u_idx=hex_dig) 
-
-        if Order.query.get(1) == None:
-            db.session.add(sell_order_1)
-
-        db.session.commit()
-
     def process_delete_order(payload_order, hex_dig):
         target = Order.query.filter_by(u_idx=hex_dig).order_by(Order.created_at.desc()).first()
         quantity = int(payload_order["quantity"])
@@ -204,10 +187,10 @@ def create_app(test_config=None):
         david = User.query.first()
         return 'Hello, {} your cool id is {}'.format(david.name, david.id)
 
-    @app.route('/securities', methods=['GET'])
+    @app.route('/http/securities', methods=['GET'])
     def get_securities():
         securities = Security.query.all()
-        result = jsonify(json_list = [security.as_dict() for security in securities])
+        result = jsonify([{'label': security.as_dict()['name']} for security in securities])
         # result = jsonify(security.as_dict())
         return result, 200
     
@@ -221,13 +204,29 @@ def create_app(test_config=None):
     def process_history():
         pass
 
-    @app.route('/http/order', methods=['GET','POST'])
+    @app.route('/http/all_orders', methods=['GET'])
+    def get_all_orders():
+        response_dict = {}
+        orders = Order.query.all()
+        response_dict = [order.as_dict() for order in orders]
+        print("Da")
+        return response_dict, 200
+
+
+    @app.route('/http/matches', methods=['GET'])
+    def get_matches():
+        response_dict = {}
+        matches = Match.query.all()
+        response_dict = [match.as_dict() for match in matches]
+        return response_dict, 200
+
+    @app.route('/http/order', methods=['POST'])
     def place_order():
         valid_orders = 0
         global_result = ''
         response_dict = {}
 
-        if request.method == 'POST':
+        if list(request.get_json().keys())[0] == "AddOrderRequest":
             payload = request.get_json()["AddOrderRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
@@ -250,16 +249,19 @@ def create_app(test_config=None):
             #response_dict['global_result'] = global_result + 'INFO: Checking for matches... \n'
             return response_dict, 200
 
-        if request.method == 'GET':
+        if list(request.get_json().keys())[0] == "ListOrdersRequest":
             payload = request.get_json()["ListOrdersRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
                 if valid:
                     valid_orders += 1
-                    user_text = payload_order['user']
+                    if 'user_token' in list(payload_order.keys()):
+                        user_text = extract_user(payload_order['user_token'])
+                        payload_order['user'] = user_text
+                    else:
+                        user_text = payload_order['user']
                     results = process_list_orders(payload_order)
-                    print(results)
-                    response_dict[user_text] = [result.as_dict() for result in results]
+                    response_dict = [result.as_dict() for result in results]
                     single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
                 else:
                     single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'

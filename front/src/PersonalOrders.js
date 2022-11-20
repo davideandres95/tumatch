@@ -5,6 +5,8 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import axios from "axios";
+import {getContext} from './Context';
 
 // Generate Order Data
 function createData(id, date, name, shipTo, paymentMethod, amount) {
@@ -51,12 +53,33 @@ function preventDefault(event) {
   event.preventDefault();
 }
 
+
+
 export default function Orders() {
+  const {isAuth, setAuth, token, setToken} = React.useContext(getContext());
+  const [order, setOrder] = React.useState('');
+
+  if(order == "") {
+    axios.post("/order", {
+      "ListOrdersRequest" : [
+        {
+          'request': 'list',
+          'user_token': token
+        }
+      ]
+    }).catch((error) => {}).then((response) => {
+      if(response != undefined) {
+        setOrder(response.data);
+      }    
+    }); 
+  }
+
   return (
     <React.Fragment>
       <Table size="small">
         <TableHead>
           <TableRow>
+            <TableCell>Date</TableCell>
             <TableCell>Price</TableCell>
             <TableCell>Quantity</TableCell>
             <TableCell>Security</TableCell>
@@ -64,13 +87,13 @@ export default function Orders() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.shipTo}</TableCell>
-              <TableCell>{row.paymentMethod}</TableCell>
-              <TableCell align="right">{`$${row.amount}`}</TableCell>
+          {order != "" && order.map((orderr) => (
+            <TableRow key={orderr.id}>
+              <TableCell>{orderr.created_at}</TableCell>
+              <TableCell>{orderr.price}</TableCell>
+              <TableCell>{orderr.quantity}</TableCell>
+              <TableCell>{orderr.security_id}</TableCell>
+              <TableCell>{orderr.side == 1 ? "BUY" : "SELL"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
