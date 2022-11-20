@@ -218,6 +218,20 @@ def create_app(test_config=None):
     def process_history():
         pass
 
+    @app.route('/all_orders', methods=['GET'])
+    def get_all_orders():
+        response_dict = {}
+        orders = Order.query.all()
+        response_dict['orders'] = [order.as_dict() for order in orders]
+        return response_dict, 200
+
+    @app.route('/matches', methods=['GET'])
+    def get_matches():
+        response_dict = {}
+        matches = Match.query.all()
+        response_dict['matches'] = [match.as_dict() for match in matches]
+        return response_dict, 200
+
     @app.route('/order', methods=['GET','POST'])
     def place_order():
         valid_orders = 0
