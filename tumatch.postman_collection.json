@@ -1,0 +1,335 @@
+{
+	"info": {
+		"_postman_id": "576c6b35-dadf-4b90-871e-73839a708c0d",
+		"name": "tumatch",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:5000/order - initial",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"2\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"5\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 22,\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 6,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 1,\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 2000,\n            \"price\": 2,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 3,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 3,\n            \"side\": \"Buy\"\n        },\n        {\n            \"timestamp\": 4,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 500,\n            \"price\": 5,\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - update",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"2000\",\n            \"price\": \"2\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"5\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 22,\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 6,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 1,\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 2000,\n            \"price\": 2,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 3,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 3,\n            \"side\": \"Buy\"\n        },\n        {\n            \"timestamp\": 4,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 500,\n            \"price\": 5,\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - delete",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"2\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"5\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 22,\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 6,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 1,\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 2000,\n            \"price\": 2,\n            \"side\": \"Sell\"\n        },\n        {\n            \"timestamp\": 3,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 3,\n            \"side\": \"Buy\"\n        },\n        {\n            \"timestamp\": 4,\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 500,\n            \"price\": 5,\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - list securities",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/http/securities",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"securities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - list orders batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ListOrdersRequest\": [\n        {\n            \"user\": \"Omar\",\n            \"request\": \"list\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"list\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/get_order_batch",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"get_order_batch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - list all orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/all_orders",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"all_orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - list matches",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/matches",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"matches"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - get order",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/http/order/2",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - usecase 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"1000\",\n            \"price\": \"2\",\n            \"side\": \"Sell\"\n        }  \n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - usecase 4",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        }\n\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - usecase 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Del\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - match",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 2,\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"Omar\",\n            \"request\": \"Add\",\n            \"security\": \"JNPR\",\n            \"quantity\": 1000,\n            \"price\": 2,\n            \"side\": \"Sell\"\n        },\n        {\n            \"user\": \"David\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": 1000,\n            \"price\": 2,\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"JNPR\",\n            \"quantity\": 1000,\n            \"price\": 2,\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/order - usecase 3 b",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AddOrderRequest\": [\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        },\n        {\n            \"user\": \"Cristian\",\n            \"request\": \"Add\",\n            \"security\": \"AAPL\",\n            \"quantity\": \"3000\",\n            \"price\": \"2\",\n            \"side\": \"Buy\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/http/order",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"http",
+						"order"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
