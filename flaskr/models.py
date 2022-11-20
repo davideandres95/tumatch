@@ -1,4 +1,4 @@
-import enum
+from enum import IntEnum
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.schema import UniqueConstraint, Index
@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 
-class Side(enum.Enum):
+class Side(IntEnum):
     buy = 1
     sell = 2
 
@@ -21,6 +21,8 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.name}>'
 
+    def as_dict(self):
+               return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Security(db.Model):
     __tablename__ = 'security'
@@ -40,18 +42,18 @@ class Order(db.Model):
             server_default=func.now())
     side = db.Column(db.Enum(Side), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship("User", backref="order", lazy=False)
+    #user = db.relationship("User", backref="order", lazy=False)
     security_id = db.Column(db.Integer, db.ForeignKey('security.id'))
-    security = db.relationship("Security", backref="order", lazy=False)
+    #security = db.relationship("Security", backref="order", lazy=False)
     price = db.Column(db.Integer, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     u_idx = db.Column(db.String(100), nullable=False, index=True, unique=True)
 
-    def __repr__(self):
-        return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
-
+    #def __repr__(self):
+    #    return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
     def as_dict(self):
                return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # Index('uuid', Order.user_id, Order.side, Order.security_id, Order.quantity, Order.price)
 
@@ -66,8 +68,11 @@ class Match(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
 
-    def __repr__(self):
-        return f'<Match: {self.sell_order.user.name} {self.buy_order.user.name} {self.sell_order.security.name} {self.quantity}>'
+    #def __repr__(self):
+    #    return f'<Match: {self.sell_order.user.name} {self.buy_order.user.name} {self.sell_order.security.name} {self.quantity}>'
+
+    def as_dict(self):
+               return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Record(db.Model):
     __tablename__ = 'record'
@@ -80,3 +85,6 @@ class Record(db.Model):
 
     def __repr__(self):
         return f'<Order: {self.user.name} {self.payload}>'
+    
+    def as_dict(self):
+               return {c.name: getattr(self, c.name) for c in self.__table__.columns}
