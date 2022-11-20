@@ -11,10 +11,6 @@ from .utils import process_websocket, process_http, process_input_internal
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    #app.config.from_mapping(
-    #    SECRET_KEY='dev',
-    #    DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    #)
 
     # configure the SQLite database, relative to the app instance folder
     socket = Sock(app)
@@ -38,22 +34,23 @@ def create_app(test_config=None):
 
     with app.app_context():
         db.create_all()
+
         david = User.query.filter_by(name='David').first()
+        if david == None:
+            password_hash = generate_password_hash("D@avid123", "sha256")
+            david = User(name='David', password=password_hash)
+            db.session.add(david)
+
         jnpr = Security.query.filter_by(name='JNPR').first()
         hash_seed = str(david.id) + str(jnpr.id) + Side.buy.name + "5" + "100"
         hash_object = hashlib.sha1(hash_seed.encode("utf-8"))
         hex_dig = hash_object.hexdigest()
         sell_order_1 = Order(side=Side.buy, user_id=david.id, security_id=jnpr.id, quantity=100, price=5, u_idx=hex_dig) 
+
         if Order.query.get(1) == None:
             db.session.add(sell_order_1)
-            db.session.commit()
 
-        if david == None:
-            password_hash = generate_password_hash("D@avid123", "sha256")
-            user_david = User(name='David', password=password_hash)
-            db.session.add(user_david, sell_order_1)
-
-            db.session.commit()
+        db.session.commit()
 
     def process_delete_order(payload_order, hex_dig):
         target = Order.query.filter_by(u_idx=hex_dig).order_by(Order.created_at.desc()).first()
@@ -77,7 +74,7 @@ def create_app(test_config=None):
     def process_list_orders(payload_order):
         user_text = payload_order["user"]
         user_id = User.query.filter_by(name=user_text).first().id
-        orders = Order.query.filter_by(id=user_id).all()
+        orders = Order.query.filter_by(user_id=user_id).all()
         print('INFO: the orders of user {} are:\n {}'.format(user_text, str(orders)))
         log_order(payload_order)
         return orders
