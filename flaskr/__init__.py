@@ -10,8 +10,7 @@ from flask_cors import CORS
 from threading import Thread
 from flask import abort
 
-from .api import register, login, extract_user, buy, sell
-export_datamatch, export_dataorder = "", ""
+from .api import register, login, extract_user
 
 def create_app(test_config=None):
     global export_datamatch, export_dataorder
@@ -183,9 +182,8 @@ def create_app(test_config=None):
     def http():
         valid, data = process_http(request)
         if valid is False:
-            abort(400, {"msg": data})
-        return buy(data['user'], data['quantity'], data['security'], data['price']) \
-            if data['request'] == 'buy' else sell(data['user'], data['quantity'], data['security'], data['price'])
+            abort(400, {"msg": data}) 
+        return buy()
     
     @app.route('/http/auth/register', methods=['POST'])
     def http_register():
@@ -206,12 +204,12 @@ def create_app(test_config=None):
         david = User.query.first()
         return 'Hello, {} your cool id is {}'.format(david.name, david.id)
 
-    @app.route('/http/securities', methods=['GET'])
+    @app.route('/securities', methods=['GET'])
     def get_securities():
         securities = Security.query.all()
-        result = jsonify([{'label': security.as_dict()['name']} for security in securities])
-        print(result)
-        return (result, 200)
+        result = jsonify(json_list = [security.as_dict() for security in securities])
+        # result = jsonify(security.as_dict())
+        return result, 200
     
     def websocket_client(arg):
         for i in range(arg):
@@ -227,6 +225,7 @@ def create_app(test_config=None):
     def place_order():
         valid_orders = 0
         global_result = ''
+        response_dict = {}
 
         if request.method == 'POST':
             payload = request.get_json()["AddOrderRequest"]
@@ -241,19 +240,20 @@ def create_app(test_config=None):
                 else:
                     single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
 
+                response_dict[idx]=single_result
+
                 global_result = global_result + single_result
 
             if db.session.commit() == None:
                 global_result = global_result + 'RESULT: {} orders from {} where processed.\n'.format(valid_orders, len(payload))
 
-            global_result = global_result + 'INFO: Checking for matches... \n'
-            return global_result, 200
+            #response_dict['global_result'] = global_result + 'INFO: Checking for matches... \n'
+            return response_dict, 200
 
         if request.method == 'GET':
             payload = request.get_json()["ListOrdersRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
-                response_dict = {}
                 if valid:
                     valid_orders += 1
                     user_text = payload_order['user']
