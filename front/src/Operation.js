@@ -20,6 +20,14 @@ export default function FormDialog(props) {
   const [errorMsg, setErrorMsg] = React.useState("");
   const {isAuth, setAuth, token, setToken} = React.useContext(getContext());
 
+  const [securities, setSecurities] = React.useState();
+  axios.get("/securities", {}).catch((error) => {setErrorMsg("Network error")}).then((response) => {
+    if(response != undefined) {
+      setSecurities(response.data);
+      console.log(securities);
+    }    
+  }); 
+
   const validate = (data) => {
     console.log(data);
     if(op == '') {
@@ -100,16 +108,33 @@ export default function FormDialog(props) {
               />
             </Grid>
           </Grid>
-          <Grid item xs={12}>
-              <TextField
-              autoFocus
-              margin="dense"
-              id="securities"
-              name="securities"
-              label="Securities (e.g.: IBM, APPL)"
-              fullWidth
-              variant="standard"
-            />
+          <Grid item container xs={12}>
+            <Grid item xs={6}>
+              Security:
+              <Select
+                  sx={{'margin-left': 10}}
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={op}
+                  label="Operation"
+                  onChange={handleChange}
+                >
+              </Select>
+            </Grid>
+            <Grid item xs={6}>
+              Operation: 
+              <Select
+                sx={{'margin-left': 10}}
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={op}
+                label="Operation"
+                onChange={handleChange}
+              >
+                <MenuItem value={'SELL'}>SELL</MenuItem>
+                <MenuItem value={'BUY'}>BUY</MenuItem>
+              </Select>
+            </Grid>
           </Grid>
           {
             
@@ -119,19 +144,6 @@ export default function FormDialog(props) {
             </Alert>
             </Grid>
           }
-          <Grid item xs={12}>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={op}
-              label="Operation"
-              onChange={handleChange}
-            >
-              <MenuItem value={'SELL'}>SELL</MenuItem>
-              <MenuItem value={'BUY'}>BUY</MenuItem>
-            </Select>
-          </Grid>
-        
         </Grid>
         <DialogActions>
           <Button variant="contained" type="submit">Perform</Button>
