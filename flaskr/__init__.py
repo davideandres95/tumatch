@@ -200,12 +200,12 @@ def create_app(test_config=None):
         david = User.query.first()
         return 'Hello, {} your cool id is {}'.format(david.name, david.id)
 
-    @app.route('/securities', methods=['GET'])
+    @app.route('/http/securities', methods=['GET'])
     def get_securities():
         securities = Security.query.all()
         result = jsonify(json_list = [security.as_dict() for security in securities])
-        # result = jsonify(security.as_dict())
-        return result, 200
+        print(result)
+        return (200, result)
     
     def websocket_client(arg):
         for i in range(arg):

@@ -20,13 +20,16 @@ export default function FormDialog(props) {
   const [errorMsg, setErrorMsg] = React.useState("");
   const {isAuth, setAuth, token, setToken} = React.useContext(getContext());
 
-  const [securities, setSecurities] = React.useState();
-  axios.get("/securities", {}).catch((error) => {setErrorMsg("Network error")}).then((response) => {
-    if(response != undefined) {
-      setSecurities(response.data);
-      console.log(securities);
-    }    
-  }); 
+  const [securities, setSecurities] = React.useState("");
+  if(securities == "") {
+    axios.get("/securities", {}).catch((error) => {setErrorMsg("Network error")}).then((response) => {
+      if(response != undefined) {
+        setSecurities(response.data);
+        console.log(securities);
+      }    
+    }); 
+  }
+
 
   const validate = (data) => {
     console.log(data);
