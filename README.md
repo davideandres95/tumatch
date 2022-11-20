@@ -30,31 +30,21 @@ In addition to the above features, we extended TUMatcher to have some extra feat
 There is multiple options for the user to enter an order to TUMatcher:
 1. via GUI:
 	- You can input the orders via the webapp delivered as frontend of TUMatcher
-	- You can find the entry widget in:
-	1.
-	2.
 
 ### 2. Delete a sell or buy order of a stock
 1. via GUI:
 	- You can input the orders via the webapp delivered as frontend of TUMatcher
-	- You can find the entry widget in:
-	1.
-	2.
+
 
 ### 3. List orders you own on the platform
 
 1. via GUI:
 	- You can input the orders via the webapp delivered as frontend of TUMatcher
-	- You can find the entry widget in:
-	1.
-	2.
+
 
 ### 4. List the matching history of all completed orderes
 1. via GUI:
 	- You can input the orders via the webapp delivered as frontend of TUMatcher
-	- You can find the entry widget in:
-		1.
-		2.
 	- For batch processing:
 	![image_2.png](./resources/image_2.png) 
 
