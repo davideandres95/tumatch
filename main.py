@@ -117,6 +117,7 @@ def update_db(requests):
 
 
 def match(orderbook_history, requests, indices_to_delete):
+    matching_history = []
     for buy_request_hash in orderbook_history['Buy']:
         buy_index_in_requests = orderbook_history['Buy'][buy_request_hash][0]
         # TODO could be saved directly to orderbook_history
@@ -140,18 +141,23 @@ def match(orderbook_history, requests, indices_to_delete):
             print("buying quantity: " + str(buy_quantity))
             print("selling quantity: " + str(sell_quantity))
             if remaining > 0:
+                matching_history.append([requests['user'][buy_index_in_requests], requests['user'][sell_index_in_requests], requests['security'][sell_index_in_requests],requests['quantity'][buy_index_in_requests],requests['price'][sell_index_in_requests]])
                 # asked buying total value is met
                 indices_to_delete.append(buy_index_in_requests)
                 requests.loc[sell_index_in_requests,
                              'quantity'] = remaining  # TODO recheck
                 break
             else:
+                if remaining == 0:
+                    matching_history.append([requests['user'][buy_index_in_requests], requests['user'][sell_index_in_requests], requests['security'][sell_index_in_requests],requests['quantity'][sell_index_in_requests],requests['price'][sell_index_in_requests]])
                 # asked selling total value is met
                 remaining = abs(remaining)
                 requests.loc[buy_index_in_requests,
                              'quantity'] = remaining  # TODO recheck
                 indices_to_delete.append(sell_index_in_requests)
                 continue
+            
+    print(matching_history)
     return requests, indices_to_delete
 
 
