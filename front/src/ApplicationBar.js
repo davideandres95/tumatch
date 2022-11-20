@@ -38,13 +38,9 @@ export default function ApplicationBar() {
       </AppBar>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <Operation/>
-        <DialogActions>
-          <Button variant="contained" onClick={() => setOpen(0)}>BUY</Button>
-          <Button variant="contained" onClick={() => setOpen(0)}>SELL</Button>
-        </DialogActions>
       </Dialog>
       <Dialog open={openToken} onClose={() => setOpenToken(false)}>
-        <DialogTitle>APIs token</DialogTitle>
+        <DialogTitle>APIs token (WebSocket: /websocket/$token)</DialogTitle>
         <DialogContent>{token}</DialogContent>
       </Dialog>
     </Box>

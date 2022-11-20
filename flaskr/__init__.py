@@ -9,6 +9,7 @@ from .utils import process_websocket, process_http, process_auth
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
 from threading import Thread
+from flask import abort
 
 from .api import register, login, extract_user
 
@@ -57,12 +58,12 @@ def create_app(test_config=None):
         
         db.session.commit()
 
-    # a simple page that says hello
     @app.route('/http', methods=['POST', 'GET'])
     def http():
         valid, data = process_http(request)
-        print(valid)
-        return 'Hello, World!'
+        if valid is False:
+            abort(400, {"msg": data}) 
+        return buy()
     
     @app.route('/http/auth/register', methods=['POST'])
     def http_register():
