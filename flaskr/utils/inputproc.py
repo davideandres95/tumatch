@@ -1,5 +1,14 @@
 from flask import request
 import re
+import base64
+import jwt
+
+def extract_user(token: str):
+    try:
+        token = base64.b64decode(token.encode("utf-8"))
+        return jwt.decode(token, key='KEY_PRIVATE')['user_name']
+    except:
+        return None
 
 def process_input_internal(request: dict):
     try:
@@ -12,7 +21,17 @@ def process_input_internal(request: dict):
             keys = list(request.keys()).copy()
             keys.sort()
 
-            if keys != ['price', 'quantity', 'request', 'security', 'side', 'user']:
+            if keys == ['price', 'quantity', 'request', 'security', 'side', 'user_token']:
+                # token process
+                user = extract_user(request['user_token'])
+                if user is None:
+                    return (False, "Invalid token")
+                del request['user_token']
+                request['user'] = user
+                keys = list(request.keys()).copy()
+                keys.sort()
+
+            if keys != ['price', 'quantity', 'request', 'security', 'side', 'user']:    
                 return (False, "Invalid format")
             if request['side'].lower() not in ['buy', 'sell', 'del']:
                 return (False, "Invalid format: Side must be [buy, sell, del]")
@@ -35,7 +54,6 @@ def normalize_dict(request: dict):
 
 def process_http(request: object):
     content_type = request.headers.get('Content-Type')
-    print(request.headers, request.form)
     if (content_type.startswith('application/json')):
         return process_input_internal(normalize_dict(request.get_json()))
     elif (content_type.startswith('multipart/form-data')):

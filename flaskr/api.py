@@ -50,3 +50,8 @@ def extract_user(token: str):
         return jwt.decode(token, key='KEY_PRIVATE')['user_name']
     except:
         return None
+
+# DEFINE APIs
+def buy(username, quantity, security, price):
+    #TODO implement is
+    return None
