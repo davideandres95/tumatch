@@ -242,23 +242,30 @@ def create_app(test_config=None):
                 global_result = global_result + 'RESULT: {} orders from {} where processed.\n'.format(valid_orders, len(payload))
 
             global_result = global_result + 'INFO: Checking for matches... \n'
+            return global_result, 200
 
         if request.method == 'GET':
             payload = request.get_json()["ListOrdersRequest"]
             for idx, payload_order in enumerate(payload):
                 valid, data = process_input_internal(payload_order)
+                response_dict = {}
                 if valid:
                     valid_orders += 1
-                    result = process_list_orders(payload_order)
+                    user_text = payload_order['user']
+                    results = process_list_orders(payload_order)
+                    print(results)
+                    response_dict[user_text] = [result.as_dict() for result in results]
                     single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
                 else:
                     single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
                 global_result = global_result + single_result
 
             global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+            print(global_result)
+            return response_dict, 200
 
-        print(global_result)
-        return global_result
+
+        
 
     @socket.route('/websocket/<token>')
     def websocket(sock, token):
