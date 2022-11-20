@@ -5,8 +5,13 @@ from flaskr.models import db, User, Security, Order, Match, Record, Side
 from flaskr.models import db
 from flask import Flask, request
 from flask_sock import Sock
-from .utils import process_websocket, process_http, process_input_internal
+from .utils import process_websocket, process_http, process_auth, process_input_internal
+from flask_jwt import JWT, jwt_required, current_identity
+from flask_cors import CORS
+from threading import Thread
+from flask import abort
 
+from .api import register, login, extract_user
 
 def create_app(test_config=None):
     # create and configure the app
@@ -15,6 +20,7 @@ def create_app(test_config=None):
     # configure the SQLite database, relative to the app instance folder
     socket = Sock(app)
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
+    CORS(app)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -110,6 +116,27 @@ def create_app(test_config=None):
     def hello_world():
         return 'Hello, World!'
 
+    @app.route('/http', methods=['POST', 'GET'])
+    def http():
+        valid, data = process_http(request)
+        if valid is False:
+            abort(400, {"msg": data}) 
+        return buy()
+    
+    @app.route('/http/auth/register', methods=['POST'])
+    def http_register():
+        valid, data = process_auth(request)
+        if valid is False:
+            abort(400, {"msg": data}) 
+        return register(data['username'], data['password'])
+
+    @app.route('/http/auth/login', methods=['POST'])
+    def http_login():
+        valid, data = process_auth(request)
+        if valid is False:
+            abort(400, {"msg": data}) 
+        return login(data['username'], data['password'])
+
     @app.route('/User')
     def print_user():
         david = User.query.first()
@@ -120,6 +147,12 @@ def create_app(test_config=None):
         security = Security.query.first()
         print(security)
         return '{}'.format(security.name)
+    
+    def websocket_client(arg):
+        for i in range(arg):
+            print("running")
+            sleep(1)
+
 
     @app.route('/history', methods=['GET'])
     def process_history():
@@ -163,11 +196,12 @@ def create_app(test_config=None):
         print(global_result)
         return global_result
 
-
-    @socket.route('/websocket')
-    def websocket(sock):
-        data = sock.receive()
-        valid = process_websocket(data)
-        print(valid)
+    @socket.route('/websocket/<token>')
+    def websocket(sock, token):
+        user = extract_user(token)
+        while True:
+            data = sock.receive()
+            valid, data = process_websocket("%s user=%s" % (data, user))
+            sock.send(data)
 
     return app

@@ -1,3 +1,5 @@
 flask
 Flask-SQLAlchemy
 flask-sock
+flask-jwt
+flask-cors

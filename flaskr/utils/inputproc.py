@@ -1,5 +1,14 @@
 from flask import request
 import re
+import base64
+import jwt
+
+def extract_user(token: str):
+    try:
+        token = base64.b64decode(token.encode("utf-8"))
+        return jwt.decode(token, key='KEY_PRIVATE')['user_name']
+    except:
+        return None
 
 def process_input_internal(request: dict):
     try:
@@ -12,19 +21,29 @@ def process_input_internal(request: dict):
             keys = list(request.keys()).copy()
             keys.sort()
 
-            if keys != ['price', 'quantity', 'request', 'security', 'side', 'user']:
+            if keys == ['price', 'quantity', 'request', 'security', 'side', 'user_token']:
+                # token process
+                user = extract_user(request['user_token'])
+                if user is None:
+                    return (False, "Invalid token")
+                del request['user_token']
+                request['user'] = user
+                keys = list(request.keys()).copy()
+                keys.sort()
+
+            if keys != ['price', 'quantity', 'request', 'security', 'side', 'user']:    
                 return (False, "Invalid format")
             if request['side'].lower() not in ['buy', 'sell', 'del']:
                 return (False, "Invalid format: Side must be [buy, sell, del]")
-            if request['quantity'].isdigit() is False or int(request['quantity']) <= 0:
+            if (isinstance(request['quantity'],  int) is False) and (request['quantity'].isdigit() is False or int(request['quantity']) <= 0):
                 return (False, "Invalid format: Quantity must be a positive integer")
-            if request['price'].isdigit() is False or int(request['price']) <= 0:
+            if (isinstance(request['price'],  int) is False) and (request['price'].isdigit() is False or int(request['price']) <= 0):
                 return (False, "Invalid format: Price must be a positive integer")
-            if len(request['user']) <= 3:
+            if len(request['user']) < 3:
                 return (False, "Invalid format: User invalid (too short or missing)")
             if len(request['security']) <= 2:
                 return (False, "Invalid format: Security invalid (too short or missing)")
-        return (True, "")
+        return (True, request)
     except:
         return (False, "Invalid format: {request, qty={}, price={}, sec={}, side={}, user={}")
     return (True, args)
@@ -35,13 +54,20 @@ def normalize_dict(request: dict):
 
 def process_http(request: object):
     content_type = request.headers.get('Content-Type')
-    print(request.headers, request.form)
     if (content_type.startswith('application/json')):
-        return process_input_internarmalize_dict(request.get_data())
+        return process_input_internal(normalize_dict(request.get_json()))
     elif (content_type.startswith('multipart/form-data')):
         return process_input_internal(normalize_dict(request.form.to_dict(flat=True)))
     else:
         return (False, 'Content-Type not supported')
+
+def process_auth(request: object):
+    data = normalize_dict(request.get_json())
+    keys = list(data.keys()).copy()
+    keys.sort()
+    if keys != [ 'password', 'username']:
+        return (False, "Invalid format")
+    return (True, data)    
 
 
 def parse_string(request: str):
