@@ -58,6 +58,7 @@ class Match(db.Model):
     sell_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     buy_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Match: {self.sell_order.user.name} {self.buy_order.user.name} {self.sell_order.security.name} {self.quantity}>'

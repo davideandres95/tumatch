@@ -115,6 +115,60 @@ def create_app(test_config=None):
                 print('Order already exists, it should be updated')
 
         log_order(payload_order)
+        return candidate_order
+
+
+    def process_match(order):
+        if( order.side == Side.sell):
+            buy_orders = Order.query.filter_by(side=Side.buy, security_id=order.security_id)
+            for buy_order in buy_orders:
+                if order.price > buy_order.price:
+                    continue
+                else:
+                    remaining = order.quantity - buy_order.quantity #might be negative!
+                    if (remaining > 0):
+                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=buy_order.quantity, price=order.price)
+                        db.session.add(result_match)
+                        order.quantity = remaining
+                        db.session.delete(buy_order)
+                        print('INFO: There was a match')
+                        break
+
+                    else:
+                        result_match = Match(sell_id=order.id, buy_id=buy_order.id, quantity=order.quantity, price=order.price)
+                        db.session.add(result_match)
+                        remaining = abs(remaining)
+                        buy_order.quantity = remaining
+                        db.session.delete(order)
+                        db.session.delete(buy_order)
+                        print('INFO: There was a match')
+                        break
+
+        else: #Side.buy
+            sell_orders = Order.query.filter_by(side=Side.sell, security_id=order.security_id)
+            for sell_order in sell_orders:
+                if order.price > sell_order.price:
+                    continue
+                else:
+                    remaining = sell_order.quantity - order.quantity #might be negative!
+                    if (remaining > 0):
+                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=order.quantity, price=sell_order.price)
+                        db.session.add(result_match)
+                        sell_order.quantity = remaining
+                        db.session.delete(sell_order)
+                        print('INFO: There was a match')
+                        break
+
+                    else:
+                        result_match = Match(sell_id=sell_order.id, buy_id=order.id, quantity=sell_order.quantity, price=sell_order.price)
+                        db.session.add(result_match)
+                        remaining = abs(remaining)
+                        order.quantity = remaining
+                        db.session.delete(sell_order)
+                        db.session.delete(order)
+                        print('INFO: There was a match')
+                        break
+
 
     # a simple page that says hello
     @app.route('/hello')
@@ -174,7 +228,8 @@ def create_app(test_config=None):
                 valid, data = process_input_internal(payload_order)
                 if valid:
                     valid_orders += 1
-                    result = process_order(payload_order)
+                    success_order = process_order(payload_order)
+                    match_result = process_match(success_order)
                     single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
                 else:
                     single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
@@ -183,6 +238,8 @@ def create_app(test_config=None):
 
             if db.session.commit() == None:
                 global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+
+            global_result = global_result + 'INFO: Checking for matches...'
 
         if request.method == 'GET':
             payload = request.get_json()["ListOrdersRequest"]
