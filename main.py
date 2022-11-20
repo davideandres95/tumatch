@@ -68,12 +68,12 @@ def update_db(requests):
                 )
                 del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
                 # delete the del order always
+                indices_to_delete.append(idx)
                 if orderbook_history[request_type].get(del_origin_hex_dig) is None:
                     print("Delete order is requested for non-existing order. Delete Order is ignored") # TODO improve reporting
                     continue
                 else:
                     del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], requests["quantity"][idx]))
-                indices_to_delete.append(idx)
 
             orderbook_history[request_type][hex_dig] = [
                 idx, [requests["quantity"][idx]]
