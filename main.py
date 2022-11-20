@@ -25,6 +25,7 @@ def update_order_quantity(old, new):
 
 def update_db(requests):
     del_requests = []
+    indices_to_delete = []
     for idx in requests.index:
         # TODO improve hashing alg, concatenation can fail if cols switched
         order_str = '"{}" requested "{}" of security "{}" with action "{}"'.format(
@@ -54,7 +55,8 @@ def update_db(requests):
                 + hex_dig
                 + ": [  UNIQUE  ] new order registration: %s" % order_str
             )
-
+            new_quantity = requests["quantity"][idx]
+            calculated_index = idx
             # Before validation check if the request is delete for non-existent add
             if requests["request"][calculated_index] == "Del":
                 del_origin_hash_seed = "[{}]{}+{}+{}:{}".format(
@@ -65,17 +67,17 @@ def update_db(requests):
                     requests["price"][idx]
                 )
                 del_origin_hex_dig = hashlib.sha1(del_origin_hash_seed.encode("utf-8")).hexdigest()
+                # delete the del order always
                 if orderbook_history[request_type].get(del_origin_hex_dig) is None:
                     print("Delete order is requested for non-existing order. Delete Order is ignored") # TODO improve reporting
-                    requests = requests.drop(labels=idx, axis=0)
                     continue
-                del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], new_quantity))
+                else:
+                    del_requests.append((orderbook_history[request_type][del_origin_hex_dig][0], requests["quantity"][idx]))
+                indices_to_delete.append(idx)
 
             orderbook_history[request_type][hex_dig] = [
                 idx, [requests["quantity"][idx]]
             ]
-            new_quantity = requests["quantity"][idx]
-            calculated_index = idx
         else:
             print(
                 "Received Order Hash: "
@@ -95,26 +97,26 @@ def update_db(requests):
                     new_quantity
                 )
             )
-            requests = requests.drop(labels=idx, axis=0)
+            indices_to_delete.append(idx)
             # FIXME the index is alredy calculated why again?? calculated_index
             calculated_index =  orderbook_history[request_type].get(hex_dig)[0]
             # print("XXXX calculated_index= " + str(calculated_index))
 
     print(del_requests)
-    # # Remove from Data base the Delete requests if they exist
-    # # TODO store locations of delete to improve perf
+    # Remove from Data base the Delete requests if they exist
+    # TODO store locations of delete to improve perf
     for delete_request_info  in del_requests:
         print("Found a delete of index: " + str(delete_request_info[0]))
         remaining = requests["quantity"][delete_request_info[0]] - delete_request_info[1]
         if remaining > 0:
             requests.loc[delete_request_info[0], 'quantity'] = remaining
         else:
-            requests = requests.drop(labels=delete_request_info[0], axis=0)
+            indices_to_delete.append(delete_request_info[0])
 
-    return orderbook_history, requests
+    return orderbook_history, requests, indices_to_delete
 
 
-def match(orderbook_history, requests):
+def match(orderbook_history, requests, indices_to_delete):
     for buy_request_hash in orderbook_history['Buy']:
         buy_index_in_requests = orderbook_history['Buy'][buy_request_hash][0]
         # TODO could be saved directly to orderbook_history
@@ -139,7 +141,7 @@ def match(orderbook_history, requests):
             print("selling quantity: " + str(sell_quantity))
             if remaining > 0:
                 # asked buying total value is met
-                requests = requests.drop(labels=buy_index_in_requests, axis=0)
+                indices_to_delete.append(buy_index_in_requests)
                 requests.loc[sell_index_in_requests,
                              'quantity'] = remaining  # TODO recheck
                 break
@@ -148,9 +150,9 @@ def match(orderbook_history, requests):
                 remaining = abs(remaining)
                 requests.loc[buy_index_in_requests,
                              'quantity'] = remaining  # TODO recheck
-                requests = requests.drop(labels=sell_index_in_requests, axis=0)
+                indices_to_delete.append(sell_index_in_requests)
                 continue
-    return requests
+    return requests, indices_to_delete
 
 
 @app.route("/")
@@ -160,12 +162,11 @@ def requests_loading():
     print("Requested Orders:")
     print(requests)
 
-    orderbook_history, requests = update_db(requests)
-    print("Filtered Orders:")
-    print(requests)
+    orderbook_history, requests, indices_to_delete = update_db(requests)
+    requests, indices_to_delete = match(orderbook_history, requests, indices_to_delete)
 
-    requests = match(orderbook_history, requests)
-    print("Matched Orders:")
+    print("Final Orders:")
+    requests = requests.drop(labels=indices_to_delete, axis=0)
     print(requests)
 
     return "</p>Requests are loaded..</p>"
