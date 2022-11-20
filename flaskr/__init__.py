@@ -177,6 +177,7 @@ def create_app(test_config=None):
 
     @app.route('/http/auth/login', methods=['POST'])
     def http_login():
+        print(request)
         valid, data = process_auth(request)
         if valid is False:
             abort(400, {"msg": data}) 
@@ -214,7 +215,6 @@ def create_app(test_config=None):
         response_dict = {}
         orders = Order.query.all()
         response_dict = [order.as_dict() for order in orders]
-        print("Da")
         return response_dict, 200
 
 
@@ -256,7 +256,7 @@ def create_app(test_config=None):
         else:
             return 'BAD PAYLOAD', 400
 
-    @app.route('/get_order_batch', methods=['POST'])
+    @app.route('/http/get_order_batch', methods=['POST'])
     def get_order_batch():
         response_dict = {}
         valid_orders = 0

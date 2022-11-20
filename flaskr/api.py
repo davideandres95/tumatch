@@ -22,8 +22,10 @@ def register(username, password):
     token = jwt.encode({
         'public_id': user.id,
         'user_name': user.name
-    }, "KEY_PRIVATE").encode('ascii')
-
+    }, "KEY_PRIVATE")
+    if isinstance(token, str):
+        token = bytes(token.encode('utf-8'))
+    token = base64.b64encode(token).decode('utf-8')
     return {'token': token}
 
 
@@ -42,6 +44,8 @@ def login(username, password):
         'public_id': user.id,
         'user_name': user.name
     }, "KEY_PRIVATE")
+    if isinstance(token, str):
+        token = bytes(token.encode('utf-8'))
     token = base64.b64encode(token).decode("utf-8")
     return {'token': token}
 

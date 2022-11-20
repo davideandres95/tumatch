@@ -1,5 +1,7 @@
-flask
-Flask-SQLAlchemy
-flask-sock
-flask-jwt
-flask-cors
+Flask==2.2.2
+Flask-Cors==3.0.10
+Flask-JWT==0.3.2
+flask-sock==0.5.2
+Flask-SocketIO==5.3.1
+Flask-SQLAlchemy==3.0.2
+PyJWT==1.4.2
