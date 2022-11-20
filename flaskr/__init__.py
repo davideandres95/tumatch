@@ -72,6 +72,7 @@ def create_app(test_config=None):
         quantity_text = payload_order["quantity"]
         previous = Order.query.filter_by(u_idx=hex_dig).first()
         previous.quantity += int(quantity_text)
+        return previous
 
     def log_order(payload_order):
         user_text = payload_order["user"]
@@ -90,6 +91,7 @@ def create_app(test_config=None):
         return orders
 
     def process_order(payload_order):
+        log_order(payload_order)
         type_text = payload_order["request"]
         user_text = payload_order["user"]
         security_text = payload_order["security"]
@@ -105,16 +107,15 @@ def create_app(test_config=None):
 
         if  type_text == "Del":
             process_delete_order(payload_order, hex_dig)
-        elif type_text == "Add":
+        else: #type is Add
             if (Order.query.filter_by(u_idx=hex_dig).first() == None):
                 candidate_order = Order(side=Side[side_text.lower()], user_id=user_id, security_id=security_id, quantity=int(quantity_text), price=int(price_text), u_idx=hex_dig) 
                 db.session.add(candidate_order)
             else:
-                process_update_order(payload_order, hex_dig)
+                candidate_order = process_update_order(payload_order, hex_dig)
                 print('Order already exists, it should be updated')
-
-        log_order(payload_order)
-        return candidate_order
+            return candidate_order
+        return None
 
 
     def process_match(order):
@@ -229,7 +230,8 @@ def create_app(test_config=None):
                 if valid:
                     valid_orders += 1
                     success_order = process_order(payload_order)
-                    match_result = process_match(success_order)
+                    if success_order:
+                        match_result = process_match(success_order)
                     single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
                 else:
                     single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
@@ -237,9 +239,9 @@ def create_app(test_config=None):
                 global_result = global_result + single_result
 
             if db.session.commit() == None:
-                global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+                global_result = global_result + 'RESULT: {} orders from {} where processed.\n'.format(valid_orders, len(payload))
 
-            global_result = global_result + 'INFO: Checking for matches...'
+            global_result = global_result + 'INFO: Checking for matches... \n'
 
         if request.method == 'GET':
             payload = request.get_json()["ListOrdersRequest"]
