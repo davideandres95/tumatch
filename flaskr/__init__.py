@@ -60,14 +60,19 @@ def create_app(test_config=None):
 
     def process_delete_order(payload_order, hex_dig):
         target = Order.query.filter_by(u_idx=hex_dig).order_by(Order.created_at.desc()).first()
+        quantity = int(payload_order["quantity"])
         if ( target != None):
-            db.session.delete(target)
-            print('INFO: an order was deleted')
+            if(quantity >= target.quantity):
+                db.session.delete(target)
+                print('INFO: an order was deleted')
+            else:
+                target.quantity-=quantity
+
 
     def process_update_order(payload_order, hex_dig):
         quantity_text = payload_order["quantity"]
         previous = Order.query.filter_by(u_idx=hex_dig).first()
-        previous.quantity = int(quantity_text)
+        previous.quantity += int(quantity_text)
 
     def log_order(payload_order):
         user_text = payload_order["user"]
