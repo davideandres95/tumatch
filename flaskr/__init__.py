@@ -74,6 +74,13 @@ def create_app(test_config=None):
         db.session.add(log)
         print('order prepared for log')
         
+    def process_list_orders(payload_order):
+        user_text = payload_order["user"]
+        user_id = User.query.filter_by(name=user_text).first().id
+        orders = Order.query.filter_by(id=user_id).all()
+        print('INFO: the orders of user {} are:\n {}'.format(user_text, str(orders)))
+        log_order(payload_order)
+        return orders
 
     def process_order(payload_order):
         type_text = payload_order["request"]
@@ -117,26 +124,48 @@ def create_app(test_config=None):
         print(security)
         return '{}'.format(security.name)
 
-    @app.route('/order', methods=['POST'])
-    def post_order():
+    @app.route('/history', methods=['GET'])
+    def process_history():
+        pass
+
+    @app.route('/order', methods=['GET','POST'])
+    def place_order():
         valid_orders = 0
         global_result = ''
-        payload = request.get_json()["AddOrderRequest"]
-        for idx, payload_order in enumerate(payload):
-            valid, data = process_input_internal(payload_order)
-            if valid:
-                valid_orders += 1
-                result = process_order(payload_order)
-                single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
-            else:
-                single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
 
-            global_result = global_result + single_result
+        if request.method == 'POST':
+            payload = request.get_json()["AddOrderRequest"]
+            for idx, payload_order in enumerate(payload):
+                valid, data = process_input_internal(payload_order)
+                if valid:
+                    valid_orders += 1
+                    result = process_order(payload_order)
+                    single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
+                else:
+                    single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
 
-        if db.session.commit() == None:
+                global_result = global_result + single_result
+
+            if db.session.commit() == None:
+                global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+
+        if request.method == 'GET':
+            payload = request.get_json()["ListOrdersRequest"]
+            for idx, payload_order in enumerate(payload):
+                valid, data = process_input_internal(payload_order)
+                if valid:
+                    valid_orders += 1
+                    result = process_list_orders(payload_order)
+                    single_result = 'SUCCESS - order #{} read succesfully. \n'.format(idx)
+                else:
+                    single_result = 'ERROR - order #{} has an invalid format: '.format(idx) + data +'\n'
+                global_result = global_result + single_result
+
             global_result = global_result + 'RESULT: {} orders from {} where processed.'.format(valid_orders, len(payload))
+
         print(global_result)
         return global_result
+
 
     @socket.route('/websocket')
     def websocket(sock):
