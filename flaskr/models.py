@@ -6,7 +6,6 @@ from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 
-
 class Side(enum.Enum):
     buy = 1
     sell = 2
@@ -22,6 +21,7 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.name}>'
 
+
 class Security(db.Model):
     __tablename__ = 'security'
     id = db.Column(db.Integer, primary_key=True)
@@ -29,6 +29,9 @@ class Security(db.Model):
 
     def __repr__(self):
         return f'<Security {self.name}>'
+
+    def as_dict(self):
+               return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Order(db.Model):
     __tablename__ = 'order'
@@ -47,6 +50,9 @@ class Order(db.Model):
     def __repr__(self):
         return f'<Order: {self.side} {self.user} {self.security} {self.quantity}>'
 
+    def as_dict(self):
+               return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 # Index('uuid', Order.user_id, Order.side, Order.security_id, Order.quantity, Order.price)
 
 
@@ -58,7 +64,6 @@ class Match(db.Model):
     sell_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     buy_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Match: {self.sell_order.user.name} {self.buy_order.user.name} {self.sell_order.security.name} {self.quantity}>'

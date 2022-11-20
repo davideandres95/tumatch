@@ -2,8 +2,7 @@ import os, enum, hashlib
 
 from werkzeug.security import generate_password_hash
 from flaskr.models import db, User, Security, Order, Match, Record, Side
-from flaskr.models import db
-from flask import Flask, request
+from flask import Flask, request, Response, jsonify
 from flask_sock import Sock
 from .utils import process_websocket, process_http, process_auth, process_input_internal
 from flask_jwt import JWT, jwt_required, current_identity
@@ -201,11 +200,12 @@ def create_app(test_config=None):
         david = User.query.first()
         return 'Hello, {} your cool id is {}'.format(david.name, david.id)
 
-    @app.route('/Securities')
-    def print_securities():
-        security = Security.query.first()
-        print(security)
-        return '{}'.format(security.name)
+    @app.route('/securities', methods=['GET'])
+    def get_securities():
+        securities = Security.query.all()
+        result = jsonify(json_list = [security.as_dict() for security in securities])
+        # result = jsonify(security.as_dict())
+        return result, 200
     
     def websocket_client(arg):
         for i in range(arg):
