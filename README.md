@@ -63,17 +63,20 @@ npm install
 npm start
 ```
 
-#### 6. Visit the webapp
+
+#### 8. Test our Backend also with POSTMAN!
+**load our config file into POSTMAN and thest the use cases**
+```
+./tumatch.postman_collection.json
+
+```
+There are initial use cases for creating orders, as well as checking for matches and verifying the functional requirements
+
+#### 7. Visit the webapp
 ```
 http://localhost:3000
 ```
 Register with your name and password. ENJOY!
-
-#### 7. Test our Backend also with POSTMAN!
-**load our config file into POSTMAN and thest the use cases**
-```
-./tumatch.postman_collection.json
-```
 
 ## Features (What it does)
 

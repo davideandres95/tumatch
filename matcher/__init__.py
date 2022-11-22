@@ -1,7 +1,7 @@
 import os, enum, hashlib
 
 from werkzeug.security import generate_password_hash
-from flaskr.models import db, User, Security, Order, Match, Record, Side
+from matcher.models import db, User, Security, Order, Match, Record, Side
 from flask import Flask, request, Response, jsonify
 from flask_sock import Sock
 from .utils import process_websocket, process_http, process_auth, process_input_internal
